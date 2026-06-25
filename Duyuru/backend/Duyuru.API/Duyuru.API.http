@@ -1,0 +1,6 @@
+@Duyuru.API_HostAddress = http://localhost:5087
+
+GET {{Duyuru.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

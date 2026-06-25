@@ -1,0 +1,59 @@
+/* Core CSS Variables - Kadastro Portal Theme (Light Mode) */
+:root {
+    --bg-color: #f0f4f8;
+    --text-color: #1e293b;
+    --text-muted: #64748b;
+    --brand-color: #0ea5e9;
+    --brand-dark: #0284c7;
+    --brand-hover: rgba(14, 165, 233, 0.15);
+    --brand-alpha: rgba(14, 165, 233, 0.4);
+    --brand-alpha-light: rgba(14, 165, 233, 0.2);
+    --card-bg: rgba(240, 244, 248, 0.75);
+    --shadow-glow: rgba(14, 165, 233, 0.3);
+    --danger-color: #ef4444;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+}
+
+/* Dark Mode Overrides (Tailwind 'dark' sinifi) */
+.dark-theme, .dark {
+    --bg-color: #0b0c10;
+    --text-color: #ffffff;
+    --text-muted: #d1d5db;
+    --brand-color: #66fcf1;
+    --brand-dark: #45a29e;
+    --brand-hover: rgba(102, 252, 241, 0.1);
+    --brand-alpha: rgba(102, 252, 241, 0.3);
+    --brand-alpha-light: rgba(102, 252, 241, 0.15);
+    --card-bg: rgba(11, 12, 16, 0.75);
+    --shadow-glow: rgba(102, 252, 241, 0.4);
+}
+
+/* Base Body Styles */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.5s ease, color 0.5s ease;
+  overflow-x: hidden;
+}
+
+/* Glassmorphism Classes */
+.glass-panel {
+  background: var(--card-bg);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  border: 1px solid var(--brand-alpha-light);
+  box-shadow: 0 4px 6px -1px var(--shadow-glow), 0 2px 4px -1px var(--shadow-glow);
+}
+
+canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+}

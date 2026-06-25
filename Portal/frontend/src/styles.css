@@ -1,0 +1,197 @@
+/* CSS Variables for Dark/Light Themes */
+:root {
+    --bg-color: #0b0c10;
+    --text-color: #ffffff;
+    --text-muted: #d1d5db;
+    --brand-color: #66fcf1;
+    --brand-dark: #45a29e;
+    --brand-alpha: rgba(102, 252, 241, 0.3);
+    --brand-alpha-light: rgba(102, 252, 241, 0.15);
+    --brand-hover: rgba(102, 252, 241, 0.1);
+    --card-bg: rgba(255, 255, 255, 0.03);
+    --shadow-glow: rgba(102, 252, 241, 0.4);
+    --glass-bg: rgba(11, 12, 16, 0.65);
+}
+
+:root.light-mode {
+    --bg-color: #f0f4f8;
+    --text-color: #1e293b;
+    --text-muted: #64748b;
+    --brand-color: #0ea5e9;
+    --brand-dark: #0284c7;
+    --brand-alpha: rgba(14, 165, 233, 0.4);
+    --brand-alpha-light: rgba(14, 165, 233, 0.2);
+    --brand-hover: rgba(14, 165, 233, 0.15);
+    --card-bg: rgba(0, 0, 0, 0.03);
+    --shadow-glow: rgba(14, 165, 233, 0.3);
+    --glass-bg: rgba(240, 244, 248, 0.65);
+}
+
+/* Global Reset & Typography */
+body,
+html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+    /* Prevent scrolling, UI is absolute */
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+/* Canvas and UI Layering */
+#networkCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+#ui-layer {
+    position: relative;
+    z-index: 10;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    pointer-events: none;
+    /* Let clicks pass through empty space to canvas if needed */
+}
+
+#ui-layer header,
+#ui-layer footer,
+#ui-layer main,
+.lucky-zone {
+    pointer-events: auto;
+    /* Re-enable clicks for UI elements */
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+/* Flip Card 3D Effects */
+.flip-card {
+    background-color: transparent;
+    width: 100%;
+    max-width: 100%;
+    height: 160px;
+    perspective: 1000px;
+}
+
+.flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+    transform-style: preserve-3d;
+}
+
+.flip-card:hover .flip-card-inner {
+    transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+.flip-card-front {
+    background: var(--card-bg);
+    border: 1px solid var(--brand-alpha);
+    backdrop-filter: blur(15px);
+    transition: border-color 0.3s ease;
+}
+
+.flip-card:hover .flip-card-front {
+    border-color: var(--brand-color);
+}
+
+.flip-card-back {
+    transform: rotateY(180deg);
+    color: white;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+/* Card Background Gradients */
+.bg-card-1 {
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+}
+
+.bg-card-2 {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+}
+
+.bg-card-3 {
+    background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+}
+
+.bg-card-4 {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.bg-card-5 {
+    background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.bg-card-6 {
+    background: linear-gradient(135deg, #ec4899, #be185d);
+}
+
+.bg-card-7 {
+    background: linear-gradient(135deg, #eff623, #4338ca);
+}
+
+.bg-card-8 {
+    background: linear-gradient(135deg, #14b8a6, #0f766e);
+}
+
+.bg-card-9 {
+    background: linear-gradient(135deg, #64748b, #475569);
+}
+
+.bg-card-10 {
+    background: linear-gradient(135deg, #06b6d4, #0e7490);
+}
+
+/* Dynamic Brand Colors */
+.text-brand {
+    color: var(--brand-color);
+}
+
+.text-brand-dark {
+    color: var(--brand-dark);
+}
+
+.bg-brand-hover:hover {
+    background-color: var(--brand-hover);
+    border-color: var(--brand-color);
+}
+
+/* Custom scrollbar for main area if needed on small screens */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--brand-alpha);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--brand-color);
+}

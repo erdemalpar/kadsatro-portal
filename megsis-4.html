@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Tapu ve Kadastro Genel Müdürlüğü CBS Portalı">
+    <title>TKGM CBS Portalı</title>
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Load Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* CSS Variables for Dark/Light Themes */
+        :root {
+            --bg-color: #0b0c10;
+            --text-color: #ffffff;
+            --text-muted: #d1d5db;
+            --brand-color: #66fcf1;
+            --brand-dark: #45a29e;
+            --brand-alpha: rgba(102, 252, 241, 0.3);
+            --brand-alpha-light: rgba(102, 252, 241, 0.15);
+            --brand-hover: rgba(102, 252, 241, 0.1);
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --shadow-glow: rgba(102, 252, 241, 0.4);
+            --glass-bg: rgba(11, 12, 16, 0.65);
+        }
+
+        :root.light-mode {
+            --bg-color: #f0f4f8;
+            --text-color: #1e293b;
+            --text-muted: #64748b;
+            --brand-color: #0ea5e9;
+            --brand-dark: #0284c7;
+            --brand-alpha: rgba(14, 165, 233, 0.4);
+            --brand-alpha-light: rgba(14, 165, 233, 0.2);
+            --brand-hover: rgba(14, 165, 233, 0.15);
+            --card-bg: rgba(0, 0, 0, 0.03);
+            --shadow-glow: rgba(14, 165, 233, 0.3);
+            --glass-bg: rgba(240, 244, 248, 0.65);
+        }
+
+        /* Global Reset & Typography */
+        body, html {
+            margin: 0; 
+            padding: 0; 
+            width: 100%; 
+            height: 100%;
+            background-color: var(--bg-color); 
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif; 
+            overflow: hidden; /* Prevent scrolling, UI is absolute */
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        /* Canvas and UI Layering */
+        #networkCanvas { 
+            position: absolute; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            z-index: 0; 
+        }
+        #ui-layer { 
+            position: relative; 
+            z-index: 10; 
+            height: 100%; 
+            display: flex; 
+            flex-direction: column; 
+            pointer-events: none; /* Let clicks pass through empty space to canvas if needed */
+        }
+        #ui-layer header, #ui-layer footer, #ui-layer main, .lucky-zone { 
+            pointer-events: auto; /* Re-enable clicks for UI elements */
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        /* Flip Card 3D Effects */
+        .flip-card { 
+            background-color: transparent; 
+            width: 100%;
+            max-width: 220px; 
+            height: 320px; 
+            perspective: 1000px; 
+        }
+        .flip-card-inner { 
+            position: relative; 
+            width: 100%; 
+            height: 100%; 
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); 
+            transform-style: preserve-3d; 
+        }
+        .flip-card:hover .flip-card-inner { 
+            transform: rotateY(180deg); 
+        }
+        .flip-card-front, .flip-card-back { 
+            position: absolute; 
+            width: 100%; 
+            height: 100%; 
+            backface-visibility: hidden; 
+            border-radius: 1rem; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 1.5rem; 
+        }
+        .flip-card-front { 
+            background: var(--card-bg); 
+            border: 1px solid var(--brand-alpha); 
+            backdrop-filter: blur(8px); 
+            transition: border-color 0.3s ease; 
+        }
+        .flip-card:hover .flip-card-front { 
+            border-color: var(--brand-color); 
+        }
+        .flip-card-back { 
+            transform: rotateY(180deg); 
+            color: white; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4); 
+        }
+        
+        /* Card Background Gradients */
+        .bg-card-1 { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+        .bg-card-2 { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .bg-card-3 { background: linear-gradient(135deg, #10b981, #047857); }
+        .bg-card-4 { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .bg-card-5 { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+
+        /* Dynamic Brand Colors */
+        .text-brand { color: var(--brand-color); }
+        .text-brand-dark { color: var(--brand-dark); }
+        .bg-brand-hover:hover { background-color: var(--brand-hover); border-color: var(--brand-color); }
+        
+        /* Custom scrollbar for main area if needed on small screens */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--brand-alpha); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--brand-color); }
+    </style>
+</head>
+<body>
+
+    <canvas id="networkCanvas" aria-hidden="true"></canvas>
+
+    <div id="ui-layer">
+        
+        <header class="w-full pt-6 pb-4 px-4 md:px-8 border-b border-[var(--brand-alpha-light)] bg-[var(--card-bg)] backdrop-blur-[8px] transition-all duration-500">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                
+                <!-- Left Title Section -->
+                <div class="text-center md:text-left">
+                    <h2 class="text-brand-dark text-xs md:text-sm font-medium tracking-wider uppercase">Bilgi Teknolojileri Dairesi Başkanlığı</h2>
+                    <h1 class="text-[var(--text-color)] text-lg md:text-xl font-bold transition-colors">Coğrafi Bilgi Sistemleri Şube Müdürlüğü</h1>
+                </div>
+                
+                <!-- Right Logo Section -->
+                <div class="flex flex-col-reverse md:flex-row items-center gap-4 text-center md:text-right">
+                    <div>
+                        <h2 class="text-[var(--text-color)] text-lg md:text-xl font-bold transition-colors">Tapu ve Kadastro</h2>
+                        <h3 class="text-brand text-xs md:text-sm font-medium uppercase">Genel Müdürlüğü</h3>
+                    </div>
+                    <div class="w-12 h-12 rounded-full border-2 border-[var(--brand-color)] flex items-center justify-center bg-[var(--bg-color)] shadow-[0_0_15px_var(--shadow-glow)] shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Bar -->
+            <nav class="flex flex-wrap justify-center items-center gap-2 md:gap-3">
+                <button class="px-3 md:px-4 py-2 rounded-lg border border-[var(--brand-alpha)] text-[var(--text-muted)] hover:text-[var(--text-color)] font-medium text-xs md:text-sm transition-all bg-brand-hover">AnaSayfa</button>
+                <button class="px-3 md:px-4 py-2 rounded-lg border border-[var(--brand-alpha)] text-[var(--text-muted)] hover:text-[var(--text-color)] font-medium text-xs md:text-sm transition-all bg-brand-hover">MEGSIS</button>
+                <button class="px-3 md:px-4 py-2 rounded-lg border border-[var(--brand-alpha)] text-[var(--text-muted)] hover:text-[var(--text-color)] font-medium text-xs md:text-sm transition-all bg-brand-hover">TKGM 3B</button>
+                <button class="px-3 md:px-4 py-2 rounded-lg border border-[var(--brand-alpha)] text-[var(--text-muted)] hover:text-[var(--text-color)] font-medium text-xs md:text-sm transition-all bg-brand-hover">Eğitim Videoları</button>
+                <button class="px-3 md:px-4 py-2 rounded-lg border border-[var(--brand-alpha)] text-[var(--text-muted)] hover:text-[var(--text-color)] font-medium text-xs md:text-sm transition-all bg-brand-hover">İstatistikler</button>
+                <button class="px-3 md:px-4 py-2 rounded-lg border border-[var(--brand-alpha)] text-[var(--text-muted)] hover:text-[var(--text-color)] font-medium text-xs md:text-sm transition-all bg-brand-hover">Parsel Sorgu</button>
+                <button class="px-4 md:px-6 py-2 rounded-lg bg-[var(--brand-dark)] hover:bg-[var(--brand-color)] text-[var(--bg-color)] font-bold text-xs md:text-sm transition-all shadow-lg mt-2 md:mt-0">Giriş Yap</button>
+                
+                <!-- Theme Toggle Button -->
+                <button id="themeToggle" aria-label="Temayı Değiştir" class="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center rounded-full border border-[var(--brand-alpha)] text-[var(--text-color)] hover:bg-brand-hover transition-all ml-0 md:ml-2 mt-2 md:mt-0 shrink-0">
+                    <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                    <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:h-5 md:w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                </button>
+            </nav>
+        </header>
+
+        <main class="flex-grow flex items-center justify-center p-4 overflow-y-auto">
+            <div class="interactive-cards w-full max-w-7xl pb-20 md:pb-0 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 md:gap-8 justify-items-center">
+                
+                <!-- Card 1 -->
+                <a href="https://cbs.tkgm.gov.tr/uygulama.aspx" target="_blank" class="flip-card block focus:outline-none focus:ring-2 focus:ring-[var(--brand-color)] rounded-2xl">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-brand mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
+                            <h3 class="font-bold uppercase tracking-widest text-center text-sm">MEGSIS Bilgilendirme</h3>
+                        </div>
+                        <div class="flip-card-back bg-card-1">
+                            <h3 class="font-bold mb-2 text-center text-sm">MEGSIS Bilgilendirme</h3>
+                            <p class="text-xs text-center leading-relaxed opacity-90">Kadastro verilerinin merkezi bir veritabanında toplanıp tapu kayıtlarıyla eşleştirildiği entegre CBS sistemidir.</p>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Card 2 -->
+                <a href="https://www.tkgm.gov.tr/harita-servislerimiz" target="_blank" class="flip-card block focus:outline-none focus:ring-2 focus:ring-[var(--brand-color)] rounded-2xl">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-brand mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                            <h3 class="font-bold uppercase tracking-widest text-center text-sm">Harita Servisleri</h3>
+                        </div>
+                        <div class="flip-card-back bg-card-2">
+                            <h3 class="font-bold mb-2 text-center text-sm">Harita Servisleri</h3>
+                            <p class="text-xs text-center leading-relaxed opacity-90">WFS ve WMS standartlarında harita paylaşım servisleri üzerinden binlerce kurumla veri paylaşımı.</p>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Card 3 -->
+                <a href="https://www.turkiye.gov.tr/tapu-ve-kadastro-genel-mudurlugu" target="_blank" class="flip-card block focus:outline-none focus:ring-2 focus:ring-[var(--brand-color)] rounded-2xl">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-brand mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" /></svg>
+                            <h3 class="font-bold uppercase tracking-widest text-center text-sm">E-Devlet Servisleri</h3>
+                        </div>
+                        <div class="flip-card-back bg-card-3">
+                            <h3 class="font-bold mb-2 text-center text-sm">E-Devlet Servisleri</h3>
+                            <p class="text-xs text-center leading-relaxed opacity-90">Vatandaşlar için e-Devlet kapısı üzerinden sunulan hızlı tapu ve kadastro hizmetleri.</p>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Card 4 -->
+                <a href="http://harita.tkgm.gov.tr/" target="_blank" class="flip-card block focus:outline-none focus:ring-2 focus:ring-[var(--brand-color)] rounded-2xl">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-brand mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /></svg>
+                            <h3 class="font-bold uppercase tracking-widest text-center text-sm">Ortofoto Servisleri</h3>
+                        </div>
+                        <div class="flip-card-back bg-card-4">
+                            <h3 class="font-bold mb-2 text-center text-sm">Ortofoto Servisleri</h3>
+                            <p class="text-xs text-center leading-relaxed opacity-90">Yüksek çözünürlüklü raster görüntülerin web üzerinden altlık olarak sunulduğu servisler.</p>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Card 5 -->
+                <a href="https://parselsorguv2.tkgm.gov.tr/login" target="_blank" class="flip-card block focus:outline-none focus:ring-2 focus:ring-[var(--brand-color)] rounded-2xl">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-brand mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                            <h3 class="font-bold uppercase tracking-widest text-center text-sm">Parsel Sorgu</h3>
+                        </div>
+                        <div class="flip-card-back bg-card-5">
+                            <h3 class="font-bold mb-2 text-center text-sm">Parsel Sorgu</h3>
+                            <p class="text-xs text-center leading-relaxed opacity-90">Kadastro ve tapu verilerini harita üzerinde sunan mekânsal sorgulama uygulaması.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </main>
+
+        <footer class="w-full py-4 px-8 text-center border-t border-[var(--brand-alpha-light)] bg-[var(--card-bg)] backdrop-blur-[8px] transition-all duration-500 shrink-0">
+            <p class="text-[var(--text-muted)] text-xs md:text-sm">Coğrafi Bilgi Sistemleri Şube Müdürlüğü © 2026</p>
+            <p class="text-brand-dark text-[10px] md:text-xs mt-1">E-Posta : <a href="mailto:cbs@tkgm.gov.tr" class="text-brand hover:underline">cbs@tkgm.gov.tr</a></p>
+        </footer>
+
+        <!-- Lucky Button / Country Draw Action -->
+        <div class="lucky-zone fixed bottom-6 right-6 flex flex-col items-end z-50">
+            <div class="relative group">
+                <button id="luckyBtn" aria-label="Harita Çiz" class="w-12 h-12 md:w-14 md:h-14 bg-[var(--brand-dark)] hover:bg-[var(--brand-color)] text-[var(--bg-color)] rounded-full flex items-center justify-center shadow-xl transition-all cursor-pointer text-xl md:text-2xl font-black focus:outline-none focus:ring-4 focus:ring-[var(--brand-alpha)]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-8 md:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                </button>
+                <div class="absolute bottom-full right-0 mb-4 px-4 py-2 bg-[var(--text-color)] text-[var(--bg-color)] text-xs md:text-sm rounded-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap font-bold shadow-lg">Sınır Çiz</div>
+            </div>
+            <div id="countryLabel" class="mt-4 px-4 md:px-6 py-2 bg-[var(--brand-dark)] text-white text-[10px] md:text-xs rounded-full opacity-0 transition-all duration-500 font-bold tracking-tighter shadow-lg pointer-events-none"></div>
+        </div>
+    </div>
+
+    <script>
+        /* Setup Canvas and Base Settings */
+        const canvas = document.getElementById('networkCanvas');
+        const ctx = canvas.getContext('2d');
+        let width, height, particles = [];
+        
+        const particleCount = window.innerWidth > 768 ? 650 : 350; // Responsive particle count
+        const mouseRadius = 120;
+        let currentParticleColor = '#66fcf1';
+        let currentLineColorRGB = '102, 252, 241';
+        let activeShape = false;
+        let mouse = { x: null, y: null };
+
+        /* Geospatial Coordinate Data (Lon/Lat bounds) */
+        const turkeyWKT = [[36.148, 35.844], [35.95, 35.915], [35.928, 36.146], [35.774, 36.324], [36.06, 36.518], [36.191, 36.589], [36.235, 36.8], [35.928, 36.941], [35.664, 36.747], [35.598, 36.606], [35.357, 36.553], [34.917, 36.73], [34.675, 36.818], [34.236, 36.571], [34.082, 36.27], [33.862, 36.359], [33.753, 36.2], [33.401, 36.146], [32.808, 36.075], [32.39, 36.146], [32.039, 36.571], [31.336, 36.818], [30.83, 36.853], [30.632, 36.906], [30.523, 36.712], [30.479, 36.359], [30.413, 36.253], [30.237, 36.377], [30.083, 36.27], [29.797, 36.2], [29.644, 36.2], [29.314, 36.288], [29.116, 36.377], [29.094, 36.536], [29.072, 36.642], [28.94, 36.782], [28.831, 36.642], [28.633, 36.765], [28.479, 36.853], [28.325, 36.835], [28.215, 36.677], [27.974, 36.571], [27.996, 36.659], [28.084, 36.782], [28.062, 36.888], [28.303, 36.993], [28.326, 37.04], [28.288, 37.075], [27.684, 36.987], [27.546, 37.0], [27.447, 37.031], [27.294, 36.965], [27.233, 37.027], [27.321, 37.163], [27.458, 37.097], [27.59, 37.136], [27.552, 37.189], [27.414, 37.394], [27.266, 37.346], [27.195, 37.355], [27.184, 37.56], [27.184, 37.603], [27.008, 37.66], [27.008, 37.686], [27.2, 37.725], [27.25, 37.782], [27.283, 37.938], [27.14, 37.99], [26.975, 38.094], [26.876, 38.042], [26.75, 38.223], [26.618, 38.202], [26.607, 38.098], [26.393, 38.24], [26.233, 38.262], [26.283, 38.305], [26.288, 38.378], [26.365, 38.314], [26.42, 38.344], [26.486, 38.396], [26.437, 38.482], [26.332, 38.641], [26.387, 38.671], [26.47, 38.675], [26.634, 38.495], [26.596, 38.456], [26.623, 38.387], [26.651, 38.314], [27.0, 38.322], [26.678, 38.43], [26.722, 38.443], [26.772, 38.361], [27.03, 38.408], [27.178, 38.456], [27.129, 38.495], [26.948, 38.439], [26.821, 38.576], [26.728, 38.713], [26.805, 38.769], [26.898, 38.731], [27.057, 38.876], [27.041, 38.94], [26.849, 38.919], [26.81, 38.957], [26.805, 39.017], [26.887, 39.073], [26.805, 39.163], [26.761, 39.172], [26.72, 39.249], [26.624, 39.276], [26.61, 39.355], [26.651, 39.359], [26.706, 39.336], [26.808, 39.387], [26.788, 39.436], [26.813, 39.44], [26.849, 39.436], [26.959, 39.544], [26.915, 39.588], [26.121, 39.453], [26.066, 39.48], [26.168, 39.645], [26.157, 39.876], [26.182, 40.007], [26.205, 40.016], [26.282, 39.999], [26.365, 40.067], [26.414, 40.106], [26.417, 40.199], [26.513, 40.224], [26.628, 40.302], [26.741, 40.392], [26.837, 40.396], [26.925, 40.406], [27.029, 40.385], [27.09, 40.444], [27.216, 40.444], [27.288, 40.469], [27.329, 40.421], [27.312, 40.379], [27.551, 40.295], [27.625, 40.325], [27.694, 40.304], [27.785, 40.331], [27.867, 40.373], [27.818, 40.404], [27.749, 40.427], [27.678, 40.486], [27.705, 40.513], [27.76, 40.521], [27.851, 40.511], [27.971, 40.498], [28.026, 40.488], [28.01, 40.45], [27.952, 40.425], [27.903, 40.396], [27.917, 40.375], [27.96, 40.35], [28.098, 40.385], [28.271, 40.398], [28.532, 40.383], [28.664, 40.364], [28.782, 40.392], [28.99, 40.358], [29.161, 40.429], [29.073, 40.473], [28.944, 40.463], [28.782, 40.519], [28.787, 40.544], [28.946, 40.615], [28.982, 40.642], [29.924, 40.711], [29.935, 40.761], [29.378, 40.777], [29.228, 40.87], [29.005, 40.992], [28.931, 40.989], [28.805, 40.954], [28.626, 40.958], [28.368, 41.051], [28.225, 41.066], [28.069, 41.057], [27.97, 40.989], [27.915, 40.964], [27.753, 41.01], [27.489, 40.968], [27.448, 40.833], [27.316, 40.71], [26.995, 40.554], [26.701, 40.464], [26.683, 40.42], [26.64, 40.398], [26.62, 40.384], [26.605, 40.34], [26.554, 40.302], [26.479, 40.28], [26.422, 40.229], [26.373, 40.206], [26.355, 40.189], [26.361, 40.156], [26.359, 40.129], [26.308, 40.091], [26.229, 40.055], [26.155, 40.044], [26.156, 40.053], [26.241, 40.167], [26.28, 40.233], [26.214, 40.319], [26.622, 40.509], [26.704, 40.509], [26.741, 40.559], [26.793, 40.559], [26.843, 40.587], [26.821, 40.655], [26.777, 40.662], [26.604, 40.635], [26.535, 40.593], [26.461, 40.614], [26.403, 40.597], [26.373, 40.609], [26.318, 40.593], [26.208, 40.597], [26.134, 40.584], [26.06, 40.624], [26.035, 40.73], [26.093, 40.732], [26.131, 40.753], [26.151, 40.805], [26.211, 40.826], [26.258, 40.909], [26.34, 40.948], [26.362, 41.021], [26.31, 41.081], [26.313, 41.251], [26.414, 41.261], [26.519, 41.338], [26.58, 41.323], [26.624, 41.356], [26.596, 41.603], [26.327, 41.735], [26.368, 41.831], [26.541, 41.831], [26.584, 41.904], [26.56, 41.926], [26.621, 41.967], [26.619, 41.98], [26.648, 41.975], [26.673, 41.967], [26.713, 41.966], [26.754, 41.961], [26.785, 41.992], [26.839, 41.968], [26.853, 41.983], [26.871, 41.991], [26.899, 41.99], [26.927, 41.998], [26.934, 42.003], [26.965, 42.0], [26.983, 42.02], [26.982, 42.035], [27.002, 42.037], [27.027, 42.059], [27.02, 42.079], [27.066, 42.093], [27.107, 42.087], [27.133, 42.065], [27.158, 42.073], [27.184, 42.067], [27.208, 42.061], [27.197, 42.08], [27.218, 42.083], [27.226, 42.101], [27.245, 42.106], [27.276, 42.106], [27.376, 42.045], [27.429, 41.984], [27.478, 41.956], [27.505, 41.956], [27.554, 41.91], [27.572, 41.907], [27.578, 41.936], [27.608, 41.944], [27.852, 41.998], [28.023, 41.985], [28.05, 41.887], [27.985, 41.871], [28.034, 41.744], [28.177, 41.551], [28.369, 41.444], [28.627, 41.365], [29.061, 41.242], [29.264, 41.225], [29.589, 41.176], [30.176, 41.151], [30.275, 41.209], [30.555, 41.142], [30.835, 41.085], [31.291, 41.118], [31.412, 41.225], [31.401, 41.328], [31.775, 41.468], [32.115, 41.608], [32.264, 41.723], [32.588, 41.83], [32.95, 41.875], [33.329, 42.022], [34.282, 41.992], [34.722, 41.976], [34.964, 42.188], [35.249, 42.074], [35.073, 41.943], [35.359, 41.714], [35.623, 41.665], [35.93, 41.763], [36.084, 41.698], [36.15, 41.451], [36.37, 41.237], [36.611, 41.319], [36.655, 41.402], [36.919, 41.336], [37.051, 41.187], [37.446, 41.088], [37.688, 41.055], [38.172, 40.922], [39.006, 41.021], [39.424, 41.121], [39.688, 41.021], [40.193, 40.955], [41.028, 41.187], [41.555, 41.484], [41.89, 41.503], [42.088, 41.503], [42.484, 41.47], [42.571, 41.618], [42.857, 41.618], [42.945, 41.453], [43.297, 41.288], [43.538, 41.04], [43.648, 40.858], [43.626, 40.524], [43.67, 40.257], [43.802, 40.122], [44.154, 40.038], [44.483, 39.971], [44.769, 39.735], [44.527, 39.735], [44.461, 39.447], [44.044, 39.379], [44.219, 39.039], [44.307, 38.593], [44.307, 38.421], [44.505, 38.404], [44.505, 38.335], [44.373, 38.197], [44.219, 37.955], [44.527, 37.764], [44.615, 37.573], [44.791, 37.294], [44.773, 37.219], [44.785, 37.144], [44.71, 37.17], [44.604, 37.167], [44.373, 37.014], [44.175, 37.136], [44.241, 37.276], [44.044, 37.311], [43.835, 37.189], [43.377, 37.321], [42.819, 37.365], [42.672, 37.174], [42.442, 37.072], [42.335, 37.218], [42.109, 37.212], [41.46, 37.052], [40.899, 37.099], [40.237, 36.816], [39.265, 36.636], [38.243, 36.838], [37.463, 36.671], [36.771, 36.715], [36.771, 36.202], [36.148, 35.844]];
+        const kibrisWKT = [[34.65,32.68], [34.68,32.59], [34.69,32.57], [34.71,32.49], [34.75,32.42], [34.79,32.39], [34.84,32.39], [34.86,32.34], [34.9,32.32], [34.93,32.32], [34.95,32.31], [34.99,32.31], [35.01,32.3], [35.02,32.26], [35.11,32.28], [35.05,32.36], [35.04,32.41], [35.06,32.47], [35.15,32.53], [35.19,32.63], [35.18,32.72], [35.14,32.83], [35.17,32.9], [35.27,32.94], [35.34,32.93], [35.4,32.91], [35.38,33], [35.35,33.14], [35.35,33.29], [35.33,33.44], [35.35,33.64], [35.41,33.77], [35.42,33.88], [35.46,34.02], [35.51,34.12], [35.56,34.17], [35.56,34.23], [35.59,34.32], [35.62,34.36], [35.65,34.43], [35.68,34.53], [35.7,34.58], [35.65,34.57], [35.63,34.55], [35.63,34.5], [35.61,34.44], [35.56,34.42], [35.53,34.36], [35.51,34.33], [35.49,34.31], [35.44,34.19], [35.41,34.13], [35.37,34.09], [35.32,34.08], [35.32,34.03], [35.32,33.98], [35.27,33.92], [35.2,33.89], [35.15,33.92], [35.06,34], [35.01,34.07], [34.96,34.09], [34.97,34.03], [34.98,33.96], [34.97,33.91], [34.94,33.86], [34.97,33.81], [34.98,33.74], [34.98,33.68], [34.93,33.64], [34.86,33.63], [34.82,33.6], [34.82,33.56], [34.78,33.5], [34.77,33.44], [34.73,33.35], [34.72,33.3], [34.72,33.28], [34.7,33.27], [34.72,33.13], [34.69,33.07], [34.66,33.03], [34.6,33], [34.57,33.03], [34.56,33], [34.57,32.92], [34.64,32.91], [34.67,32.87], [34.67,32.8], [34.65,32.74], [34.65,32.68]];
+        const azerbaycanWKT = [[38.85,46.52], [39.05,46.51], [39.23,46.49], [39.34,46.48], [39.39,46.38], [39.45,46.37], [39.5,46.54], [39.55,46.6], [39.59,46.52], [39.58,46.41], [39.64,46.38], [39.63,46.27], [39.59,46.16], [39.66,46.13], [39.79,45.97], [39.85,45.81], [39.95,45.8], [39.98,45.6], [40.02,45.58], [40.05,45.67], [40.02,45.84], [40.06,45.9], [40.15,45.98], [40.25,45.96], [40.3,45.93], [40.38,45.63], [40.5,45.45], [40.59,45.45], [40.65,45.34], [40.73,45.4], [40.79,45.57], [40.83,45.6], [40.86,45.61], [40.89,45.6], [40.89,45.58], [40.89,45.55], [40.93,45.48], [40.96,45.44], [40.98,45.41], [41.01,45.44], [41.03,45.4], [41.01,45.37], [41,45.31], [41.01,45.26], [41.03,45.2], [41.08,45.15], [41.05,45.12], [41.05,45.07], [41.03,45], [41.07,44.97], [41.1,45], [41.12,45.11], [41.13,45.18], [41.15,45.21], [41.16,45.2], [41.17,45.15], [41.2,45.13], [41.18,45.09], [41.18,45.06], [41.2,45.03], [41.21,45.02], [41.22,45.03], [41.22,45.05], [41.25,45.05], [41.28,45.02], [41.3,45.01], [41.33,45.06], [41.4,45.16], [41.47,45.29], [41.43,45.43], [41.41,45.55], [41.35,45.76], [41.3,45.71], [41.22,45.8], [41.17,45.98], [41.18,46.14], [41.19,46.23], [41.14,46.35], [41.1,46.4], [41.05,46.49], [41.09,46.65], [41.22,46.69], [41.28,46.72], [41.39,46.62], [41.42,46.47], [41.49,46.35], [41.56,46.3], [41.62,46.22], [41.7,46.18], [41.77,46.18], [41.78,46.26], [41.81,46.35], [41.91,46.43], [41.85,46.54], [41.84,46.73], [41.75,46.84], [41.62,47.02], [41.51,47.17], [41.33,47.3], [41.23,47.5], [41.18,47.71], [41.21,47.87], [41.42,48.04], [41.5,48.09], [41.54,48.3], [41.73,48.52], [41.84,48.6], [41.73,48.73], [41.47,48.98], [41.27,49.14], [41.02,49.18], [40.84,49.4], [40.8,49.53], [40.68,49.54], [40.54,49.68], [40.55,49.96], [40.44,50.36], [40.28,50.37], [40.34,49.84], [40.21,49.6], [40.11,49.42], [39.79,49.41], [39.69,49.42], [39.5,49.27], [39.33,49.43], [39.25,49.43], [39.34,49.24], [39.13,49.23], [39.11,49.1], [39.24,48.95], [38.98,48.94], [38.88,48.88], [38.85,48.84], [38.8,48.83], [38.73,48.88], [38.66,48.88], [38.45,48.89], [38.45,48.8], [38.4,48.71], [38.4,48.61], [38.55,48.48], [38.61,48.46], [38.6,48.32], [38.68,48.24], [38.74,48.27], [38.79,48.08], [38.84,48.01], [38.91,48.01], [38.96,48.19], [39.02,48.35], [39.12,48.31], [39.12,48.22], [39.27,48.11], [39.33,48.24], [39.38,48.37], [39.44,48.31], [39.72,48.01], [39.66,47.92], [39.66,47.81], [39.59,47.74], [39.52,47.57], [39.46,47.39], [39.35,47.3], [39.25,47.07], [39.18,47.05], [39.15,46.98], [39.15,46.87], [39.03,46.76], [38.9,46.61], [38.85,46.52]];
+
+        const countryData = {
+            'Türkiye': turkeyWKT,
+            // Kıbrıs ve Azerbaycan verileri [Enlem, Boylam] olduğu için dinamik olarak [Boylam, Enlem] formatına tersine çeviriyoruz:
+            'Kıbrıs': kibrisWKT.map(p => [p[1], p[0]]),
+            'Azerbaycan': azerbaycanWKT.map(p => [p[1], p[0]])
+        };
+
+        let currentCountryIndex = 0; 
+
+        function updateCanvasTheme() {
+            const isLight = document.documentElement.classList.contains('light-mode');
+            currentParticleColor = isLight ? '#0ea5e9' : '#66fcf1';
+            currentLineColorRGB = isLight ? '14, 165, 233' : '102, 252, 241';
+            particles.forEach(p => p.color = currentParticleColor);
+        }
+
+        // Transforms lon/lat points into a structured line that fits the screen
+        function formShape(points) {
+            if (!points || points.length < 2) return; 
+            
+            activeShape = true;
+            
+            let totalLength = 0;
+            const segments = [];
+            for (let i = 0; i < points.length - 1; i++) {
+                const dx = points[i+1][0] - points[i][0];
+                const dy = points[i+1][1] - points[i][1];
+                const len = Math.sqrt(dx*dx + dy*dy);
+                totalLength += len;
+                segments.push({ start: points[i], end: points[i+1], len: len, cumulative: totalLength });
+            }
+
+            const minX = Math.min(...points.map(p => p[0])), maxX = Math.max(...points.map(p => p[0]));
+            const minY = Math.min(...points.map(p => p[1])), maxY = Math.max(...points.map(p => p[1]));
+            
+            // Ekranın %70-80'ini kaplayacak şekilde dinamik ölçekle
+            const scaleFactor = window.innerWidth < 768 ? 0.9 : 0.7;
+            const scale = Math.min(width * scaleFactor / (maxX - minX), height * scaleFactor / (maxY - minY));
+            const centerX = (minX + maxX) / 2, centerY = (minY + maxY) / 2;
+
+            particles.forEach((p, index) => {
+                const targetDist = (index / particles.length) * totalLength;
+                const seg = segments.find(s => s.cumulative >= targetDist) || segments[segments.length - 1];
+                const segmentRatio = seg.len === 0 ? 0 : 1 - (seg.cumulative - targetDist) / seg.len;
+                
+                const rawX = seg.start[0] + (seg.end[0] - seg.start[0]) * segmentRatio;
+                const rawY = seg.start[1] + (seg.end[1] - seg.start[1]) * segmentRatio;
+
+                // Harita izdüşümü için Y eksenini ters çevir
+                p.targetX = width/2 + (rawX - centerX) * scale;
+                p.targetY = height/2 - (rawY - centerY) * scale;
+            });
+        }
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 1.5;
+                this.vy = (Math.random() - 0.5) * 1.5;
+                this.radius = 1.2;
+                this.color = currentParticleColor;
+                this.targetX = null; 
+                this.targetY = null;
+            }
+            update() {
+                if (activeShape && this.targetX !== null) {
+                    this.x += (this.targetX - this.x) * 0.08;
+                    this.y += (this.targetY - this.y) * 0.08;
+                } else {
+                    if (this.x < 0 || this.x > width) this.vx *= -1;
+                    if (this.y < 0 || this.y > height) this.vy *= -1;
+                    this.x += this.vx; 
+                    this.y += this.vy;
+                }
+                
+                // Fare veya Dokunma etkileşimi (itme)
+                if (mouse.x && Math.hypot(mouse.x - this.x, mouse.y - this.y) < mouseRadius) {
+                    const angle = Math.atan2(this.y - mouse.y, this.x - mouse.x);
+                    this.x += Math.cos(angle) * 2; 
+                    this.y += Math.sin(angle) * 2;
+                }
+            }
+            draw() {
+                ctx.beginPath(); 
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color; 
+                ctx.fill();
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            const distLimit = activeShape ? 25 : 120; // Sınır çiziminde daha yakın bağlantı
+            
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update(); 
+                particles[i].draw();
+                
+                for (let j = i + 1; j < particles.length; j++) {
+                    const d = Math.hypot(particles[i].x - particles[j].x, particles[i].y - particles[j].y);
+                    if (d < distLimit) {
+                        ctx.beginPath(); 
+                        ctx.moveTo(particles[i].x, particles[i].y); 
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = `rgba(${currentLineColorRGB}, ${1 - d/distLimit})`;
+                        ctx.lineWidth = 0.8; 
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            if (activeShape) {
+                // Resize during a shape redraws it
+                const selectedCountry = Object.keys(countryData)[(currentCountryIndex - 1 + Object.keys(countryData).length) % Object.keys(countryData).length];
+                formShape(countryData[selectedCountry]);
+            }
+        }
+
+        // Global Event Listeners
+        window.addEventListener('resize', resize);
+        
+        // Mouse Interaction
+        window.addEventListener('mousemove', e => { 
+            mouse.x = e.clientX; mouse.y = e.clientY; 
+        });
+        window.addEventListener('mouseleave', () => { 
+            mouse.x = null; mouse.y = null; 
+        });
+
+        // Touch Interaction for mobile
+        window.addEventListener('touchmove', e => {
+            if(e.touches.length > 0) {
+                mouse.x = e.touches[0].clientX;
+                mouse.y = e.touches[0].clientY;
+            }
+        });
+        window.addEventListener('touchend', () => {
+            mouse.x = null; mouse.y = null;
+        });
+        
+        // Theme Toggle Event
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            document.documentElement.classList.toggle('light-mode');
+            document.getElementById('sunIcon').classList.toggle('hidden');
+            document.getElementById('moonIcon').classList.toggle('hidden');
+            updateCanvasTheme();
+        });
+
+        // Shape Drawer Event
+        document.getElementById('luckyBtn').addEventListener('click', () => {
+            const countries = Object.keys(countryData);
+            const selectedCountry = countries[currentCountryIndex];
+            const points = countryData[selectedCountry];
+            
+            // Sıradaki ülkeyi döngüsel olarak ayarla
+            currentCountryIndex = (currentCountryIndex + 1) % countries.length;
+            
+            const label = document.getElementById('countryLabel');
+
+            if (points && points.length > 1) {
+                formShape(points);
+                label.innerText = `${selectedCountry.toUpperCase()} SINIRLARI ÇİZİLİYOR...`;
+            } else {
+                activeShape = false;
+                label.innerText = `${selectedCountry.toUpperCase()} KOORDİNATLARI BEKLENİYOR...`;
+            }
+
+            label.style.opacity = "1";
+            setTimeout(() => { 
+                activeShape = false; 
+                label.style.opacity = "0"; 
+            }, 15000); // 15 saniye boyunca şekli koru, sonra serbest bırak
+        });
+
+        // Startup
+        window.onload = () => { 
+            try {
+                resize(); 
+                for(let i=0; i<particleCount; i++) {
+                    particles.push(new Particle()); 
+                }
+                animate(); 
+            } catch(e) {
+                console.error("Animasyon başlatılamadı:", e);
+            }
+        };
+    </script>
+</body>
+</html>

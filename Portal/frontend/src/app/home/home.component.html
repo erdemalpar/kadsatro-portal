@@ -1,0 +1,216 @@
+<canvas id="networkCanvas" aria-hidden="true"></canvas>
+
+<div id="ui-layer">
+    <header class="w-full py-3 px-4 md:px-8 border-b border-[var(--brand-alpha-light)] bg-[var(--card-bg)] backdrop-blur-[8px] transition-all duration-500">
+        <div class="flex flex-row justify-between items-center w-full">
+            
+            <!-- Sol Kısım: Kurum Bilgileri -->
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-full border-2 border-[var(--brand-color)] hidden md:flex items-center justify-center bg-[var(--bg-color)] shadow-[0_0_10px_var(--shadow-glow)] shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div class="text-left">
+                    <h1 class="text-[var(--text-color)] text-sm md:text-base font-bold transition-colors leading-tight">Tapu ve Kadastro Genel Müdürlüğü</h1>
+                    <h2 class="text-brand-dark text-[10px] md:text-xs font-medium tracking-wider uppercase leading-tight mt-0.5">Bilgi Teknolojileri Dairesi Başkanlığı</h2>
+                </div>
+            </div>
+
+            <!-- Sağ Kısım: Kullanıcı ve Ayarlar -->
+            <div class="flex flex-row items-center gap-3 md:gap-4">
+                <button id="themeToggle" aria-label="Temayı Değiştir" class="w-8 h-8 md:w-9 md:h-9 flex items-center justify-center rounded-full border border-[var(--brand-alpha)] text-[var(--text-color)] hover:bg-brand-hover transition-all shrink-0">
+                    <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                    <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:h-5 md:w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+                </button>
+                
+                <!-- Oturum Açmış Kullanıcı Paneli -->
+                <div class="flex items-center gap-2">
+              <div class="h-8 w-8 rounded-full border border-[var(--brand-alpha)] overflow-hidden">
+                <img src="https://ui-avatars.com/api/?name=User&background=random" alt="Avatar" class="w-full h-full object-cover">
+              </div>
+              <div class="flex flex-col">
+                <span class="text-[var(--text-color)] text-xs md:text-sm font-bold leading-none">{{ currentUser }}</span>
+                <span class="text-[var(--text-muted)] text-[10px]">{{ currentRole }}</span>
+              </div>
+              <button (click)="logout()" class="ml-2 w-8 h-8 flex items-center justify-center rounded-full bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-all" title="Çıkış Yap">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+              </button>
+            </div>
+            </div>
+            
+        </div>
+    </header>
+
+    <main class="flex-grow flex items-center justify-center p-4 overflow-y-auto w-full">
+        <div class="interactive-cards w-full max-w-7xl pb-20 md:pb-0 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 justify-items-center">
+            
+            <!-- 1. Başvuru İşlemleri -->
+            <a href="http://localhost:4201" class="flip-card block focus:outline-none focus:ring-2 focus:ring-[var(--brand-color)] rounded-2xl cursor-pointer">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front p-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-brand mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        <h3 class="font-bold uppercase tracking-widest text-center text-[10px] md:text-xs">Başvuru İşlemleri</h3>
+                    </div>
+                    <div class="flip-card-back bg-card-1 p-4">
+                        <h3 class="font-bold mb-1 text-center text-xs">Başvuru İşlemleri</h3>
+                        <p class="text-[10px] text-center leading-relaxed opacity-90">Sistem üzerinden tüm başvuruları gerçekleştirin.</p>
+                        <span class="text-[8px] mt-2 opacity-50">Port: 4201</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- 2. Duyuru -->
+            <a [href]="'http://localhost:4205?token=' + dysRole + '&user=' + dysUsername" class="flip-card block focus:outline-none focus:ring-2 focus:ring-[var(--brand-color)] rounded-2xl cursor-pointer">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front p-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-brand mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>
+                        <h3 class="font-bold uppercase tracking-widest text-center text-[10px] md:text-xs">Duyuru</h3>
+                    </div>
+                    <div class="flip-card-back bg-card-4 p-4">
+                        <h3 class="font-bold mb-1 text-center text-xs">Duyuru</h3>
+                        <p class="text-[10px] text-center leading-relaxed opacity-90">Kurumsal duyurular ve sistem bilgilendirmeleri.</p>
+                        <span class="text-[8px] mt-2 opacity-50">Port: 4205</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- 3. Fen Klasörü -->
+            <a href="http://localhost:4204" class="flip-card block focus:outline-none focus:ring-2 focus:ring-[var(--brand-color)] rounded-2xl cursor-pointer">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front p-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-brand mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" /></svg>
+                        <h3 class="font-bold uppercase tracking-widest text-center text-[10px] md:text-xs">Fen Klasörü</h3>
+                    </div>
+                    <div class="flip-card-back bg-card-3 p-4">
+                        <h3 class="font-bold mb-1 text-center text-xs">Fen Klasörü</h3>
+                        <p class="text-[10px] text-center leading-relaxed opacity-90">Teknik dokümanlar ve arşiv klasör yönetimi.</p>
+                        <span class="text-[8px] mt-2 opacity-50">Port: 4204</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- 4. Harita Sorgu -->
+            <a href="http://localhost:4202" class="flip-card block focus:outline-none focus:ring-2 focus:ring-[var(--brand-color)] rounded-2xl cursor-pointer">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front p-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-brand mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" /></svg>
+                        <h3 class="font-bold uppercase tracking-widest text-center text-[10px] md:text-xs">Harita Sorgu</h3>
+                    </div>
+                    <div class="flip-card-back bg-card-2 p-4">
+                        <h3 class="font-bold mb-1 text-center text-xs">Harita Sorgu</h3>
+                        <p class="text-[10px] text-center leading-relaxed opacity-90">Mekansal sorgulamalar ve parsel analizleri yapın.</p>
+                        <span class="text-[8px] mt-2 opacity-50">Port: 4202</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- 5. İstatistik -->
+            <a routerLink="/istatistik" class="flip-card block focus:outline-none focus:ring-2 focus:ring-[var(--brand-color)] rounded-2xl cursor-pointer">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front p-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-brand mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                        <h3 class="font-bold uppercase tracking-widest text-center text-[10px] md:text-xs">İstatistik</h3>
+                    </div>
+                    <div class="flip-card-back bg-card-5 p-4">
+                        <h3 class="font-bold mb-1 text-center text-xs">İstatistik</h3>
+                        <p class="text-[10px] text-center leading-relaxed opacity-90">Sistem verileri ve kullanım analizleri.</p>
+                        <span class="text-[8px] mt-2 opacity-50">Port: 4206</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- 6. Kontrol Sorgu -->
+            <a href="http://localhost:4207" class="flip-card block focus:outline-none focus:ring-2 focus:ring-[var(--brand-color)] rounded-2xl cursor-pointer">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front p-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-brand mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <h3 class="font-bold uppercase tracking-widest text-center text-[10px] md:text-xs">Kontrol Sorgu</h3>
+                    </div>
+                    <div class="flip-card-back bg-card-6 p-4">
+                        <h3 class="font-bold mb-1 text-center text-xs">Kontrol Sorgu</h3>
+                        <p class="text-[10px] text-center leading-relaxed opacity-90">Veri bütünlüğü ve kalite kontrol süreçleri.</p>
+                        <span class="text-[8px] mt-2 opacity-50">Port: 4207</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- 7. Özel Alan Yönetim -->
+            <a href="http://localhost:4208" class="flip-card block focus:outline-none focus:ring-2 focus:ring-[var(--brand-color)] rounded-2xl cursor-pointer">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front p-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-brand mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                        <h3 class="font-bold uppercase tracking-widest text-center text-[10px] md:text-xs">Özel Alan Yönetim</h3>
+                    </div>
+                    <div class="flip-card-back bg-card-7 p-4">
+                        <h3 class="font-bold mb-1 text-center text-xs">Özel Alan Yön.</h3>
+                        <p class="text-[10px] text-center leading-relaxed opacity-90">Koruma bölgeleri ve özel alan sınır yönetimi.</p>
+                        <span class="text-[8px] mt-2 opacity-50">Port: 4208</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- 8. Proje Yönetim -->
+            <a href="http://localhost:4209" class="flip-card block focus:outline-none focus:ring-2 focus:ring-[var(--brand-color)] rounded-2xl cursor-pointer">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front p-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-brand mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+                        <h3 class="font-bold uppercase tracking-widest text-center text-[10px] md:text-xs">Proje Yönetim</h3>
+                    </div>
+                    <div class="flip-card-back bg-card-8 p-4">
+                        <h3 class="font-bold mb-1 text-center text-xs">Proje Yönetim</h3>
+                        <p class="text-[10px] text-center leading-relaxed opacity-90">Kadastro projeleri ihale ve aşama takibi.</p>
+                        <span class="text-[8px] mt-2 opacity-50">Port: 4209</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- 9. Tescil Harici Alan -->
+            <a href="http://localhost:4210" class="flip-card block focus:outline-none focus:ring-2 focus:ring-[var(--brand-color)] rounded-2xl cursor-pointer">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front p-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-brand mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <h3 class="font-bold uppercase tracking-widest text-center text-[10px] md:text-xs">Tescil Harici Alan</h3>
+                    </div>
+                    <div class="flip-card-back bg-card-9 p-4">
+                        <h3 class="font-bold mb-1 text-center text-xs">Tescil Harici Alan</h3>
+                        <p class="text-[10px] text-center leading-relaxed opacity-90">Tescilsiz alanların haritalandırılması ve idaresi.</p>
+                        <span class="text-[8px] mt-2 opacity-50">Port: 4210</span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- 10. Yardım -->
+            <a routerLink="/yardim" class="flip-card block focus:outline-none focus:ring-2 focus:ring-[var(--brand-color)] rounded-2xl cursor-pointer">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front p-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-brand mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <h3 class="font-bold uppercase tracking-widest text-center text-[10px] md:text-xs">Yardım</h3>
+                    </div>
+                    <div class="flip-card-back bg-card-10 p-4">
+                        <h3 class="font-bold mb-1 text-center text-xs">Yardım</h3>
+                        <p class="text-[10px] text-center leading-relaxed opacity-90">Kılavuzlar ve teknik destek talepleri.</p>
+                        <span class="text-[8px] mt-2 opacity-50">Port: 4211</span>
+                    </div>
+                </div>
+            </a>
+
+        </div>
+    </main>
+
+    <footer class="w-full py-4 px-8 text-center border-t border-[var(--brand-alpha-light)] bg-[var(--card-bg)] backdrop-blur-[8px] transition-all duration-500 shrink-0">
+        <p class="text-[var(--text-muted)] text-xs md:text-sm">Coğrafi Bilgi Sistemleri Şube Müdürlüğü © 2026</p>
+        <p class="text-brand-dark text-[10px] md:text-xs mt-1">E-Posta : <a href="mailto:cbs@tkgm.gov.tr" class="text-brand hover:underline">cbs&#64;tkgm.gov.tr</a></p>
+    </footer>
+
+    <!-- Lucky Button / Country Draw Action -->
+    <div class="lucky-zone fixed bottom-6 right-6 flex flex-col items-end z-50">
+        <div class="relative group">
+            <button id="luckyBtn" aria-label="Harita Çiz" class="w-12 h-12 md:w-14 md:h-14 bg-[var(--brand-dark)] hover:bg-[var(--brand-color)] text-[var(--bg-color)] rounded-full flex items-center justify-center shadow-xl transition-all cursor-pointer text-xl md:text-2xl font-black focus:outline-none focus:ring-4 focus:ring-[var(--brand-alpha)]">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-8 md:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </button>
+            <div class="absolute bottom-full right-0 mb-4 px-4 py-2 bg-[var(--text-color)] text-[var(--bg-color)] text-xs md:text-sm rounded-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity whitespace-nowrap font-bold shadow-lg">Sınır Çiz</div>
+        </div>
+        <div id="countryLabel" class="mt-4 px-4 md:px-6 py-2 bg-[var(--brand-dark)] text-white text-[10px] md:text-xs rounded-full opacity-0 transition-all duration-500 font-bold tracking-tighter shadow-lg pointer-events-none"></div>
+    </div>
+</div>

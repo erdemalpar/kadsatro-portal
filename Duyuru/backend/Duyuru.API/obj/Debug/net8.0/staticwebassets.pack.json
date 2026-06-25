@@ -1,0 +1,65 @@
+{
+  "Files": [
+    {
+      "Id": "/Users/erdem/.gemini/antigravity/scratch/Kadastro-Portal/Duyuru/backend/Duyuru.API/wwwroot/uploads/050997eb-37e9-41a8-ac26-70ff5a039bfb_nato.jpeg",
+      "PackagePath": "staticwebassets/uploads/050997eb-37e9-41a8-ac26-70ff5a039bfb_nato.jpeg"
+    },
+    {
+      "Id": "/Users/erdem/.gemini/antigravity/scratch/Kadastro-Portal/Duyuru/backend/Duyuru.API/wwwroot/uploads/0d30797d-73b4-44ca-80cf-ec0f9be35e08_nato.jpeg",
+      "PackagePath": "staticwebassets/uploads/0d30797d-73b4-44ca-80cf-ec0f9be35e08_nato.jpeg"
+    },
+    {
+      "Id": "/Users/erdem/.gemini/antigravity/scratch/Kadastro-Portal/Duyuru/backend/Duyuru.API/wwwroot/uploads/0dc03b9b-9077-49f7-bf13-70941b00e842_natovid.mp4",
+      "PackagePath": "staticwebassets/uploads/0dc03b9b-9077-49f7-bf13-70941b00e842_natovid.mp4"
+    },
+    {
+      "Id": "/Users/erdem/.gemini/antigravity/scratch/Kadastro-Portal/Duyuru/backend/Duyuru.API/wwwroot/uploads/3f8f40a8-60a5-43c9-96d7-9b691f0a69cc_nato.jpeg",
+      "PackagePath": "staticwebassets/uploads/3f8f40a8-60a5-43c9-96d7-9b691f0a69cc_nato.jpeg"
+    },
+    {
+      "Id": "/Users/erdem/.gemini/antigravity/scratch/Kadastro-Portal/Duyuru/backend/Duyuru.API/wwwroot/uploads/3fdc4708-81a6-4b49-9d4e-3ab291838c06_nato.jpeg",
+      "PackagePath": "staticwebassets/uploads/3fdc4708-81a6-4b49-9d4e-3ab291838c06_nato.jpeg"
+    },
+    {
+      "Id": "/Users/erdem/.gemini/antigravity/scratch/Kadastro-Portal/Duyuru/backend/Duyuru.API/wwwroot/uploads/55ad7def-aee6-402e-bfdd-f1aa2a3d8693_natovid.mp4",
+      "PackagePath": "staticwebassets/uploads/55ad7def-aee6-402e-bfdd-f1aa2a3d8693_natovid.mp4"
+    },
+    {
+      "Id": "/Users/erdem/.gemini/antigravity/scratch/Kadastro-Portal/Duyuru/backend/Duyuru.API/wwwroot/uploads/67b9ef71-8ee1-4d51-8bcb-526827da4298_nato.jpeg",
+      "PackagePath": "staticwebassets/uploads/67b9ef71-8ee1-4d51-8bcb-526827da4298_nato.jpeg"
+    },
+    {
+      "Id": "/Users/erdem/.gemini/antigravity/scratch/Kadastro-Portal/Duyuru/backend/Duyuru.API/wwwroot/uploads/81dc7da5-8fa7-47c2-a55c-ff1ccf6ac7af_nato.jpeg",
+      "PackagePath": "staticwebassets/uploads/81dc7da5-8fa7-47c2-a55c-ff1ccf6ac7af_nato.jpeg"
+    },
+    {
+      "Id": "/Users/erdem/.gemini/antigravity/scratch/Kadastro-Portal/Duyuru/backend/Duyuru.API/wwwroot/uploads/9e887436-1468-46ca-b151-e6ea978a1c9c_nato.jpeg",
+      "PackagePath": "staticwebassets/uploads/9e887436-1468-46ca-b151-e6ea978a1c9c_nato.jpeg"
+    },
+    {
+      "Id": "/Users/erdem/.gemini/antigravity/scratch/Kadastro-Portal/Duyuru/backend/Duyuru.API/wwwroot/uploads/d0dff623-6d09-4c1a-aef7-ebe2ca1e9a66_nato.jpeg",
+      "PackagePath": "staticwebassets/uploads/d0dff623-6d09-4c1a-aef7-ebe2ca1e9a66_nato.jpeg"
+    },
+    {
+      "Id": "/Users/erdem/.gemini/antigravity/scratch/Kadastro-Portal/Duyuru/backend/Duyuru.API/wwwroot/uploads/febf1464-411c-40e9-87ae-ed6ed9812930_nato.jpeg",
+      "PackagePath": "staticwebassets/uploads/febf1464-411c-40e9-87ae-ed6ed9812930_nato.jpeg"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.Duyuru.API.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.build.Duyuru.API.props",
+      "PackagePath": "build\\Duyuru.API.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.buildMultiTargeting.Duyuru.API.props",
+      "PackagePath": "buildMultiTargeting\\Duyuru.API.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.buildTransitive.Duyuru.API.props",
+      "PackagePath": "buildTransitive\\Duyuru.API.props"
+    }
+  ],
+  "ElementsToRemove": []
+}
