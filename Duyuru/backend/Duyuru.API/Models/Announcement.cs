@@ -11,6 +11,9 @@ namespace Duyuru.API.Models
         // Popup format type: Glassmorphism, Cinematic, Story, Toast
         public string Format { get; set; } = "Glassmorphism";
         
+        // Container width: Standart, Geniş, Tam Ekran
+        public string LayoutWidth { get; set; } = "Standart";
+        
         public AnnouncementStatus Status { get; set; } = AnnouncementStatus.PendingEditor;
         
         public DateTime? StartDate { get; set; }

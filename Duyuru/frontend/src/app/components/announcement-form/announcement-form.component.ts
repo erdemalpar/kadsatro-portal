@@ -22,7 +22,7 @@ import { Editor, Toolbar, NgxEditorModule } from 'ngx-editor';
         </div>
 
         <!-- Format Seçimi & Kategori Seçimi -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label class="block text-xs font-bold text-gray-700 mb-1">Gösterim Stili</label>
             <select [(ngModel)]="format" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-color)]">
@@ -45,6 +45,14 @@ import { Editor, Toolbar, NgxEditorModule } from 'ngx-editor';
               <option [value]="8">Genelge</option>
               <option [value]="9">Acil Duyuru</option>
               <option [value]="10">Sağlık</option>
+            </select>
+          </div>
+          <div *ngIf="canSetDuration()">
+            <label class="block text-xs font-bold text-gray-700 mb-1">İçerik Genişliği</label>
+            <select [(ngModel)]="layoutWidth" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-color)]">
+              <option value="Standart">Standart</option>
+              <option value="Geniş">Geniş</option>
+              <option value="Tam Ekran">Tam Ekran</option>
             </select>
           </div>
         </div>
@@ -110,7 +118,7 @@ import { Editor, Toolbar, NgxEditorModule } from 'ngx-editor';
         <div class="flex-1 flex flex-col min-h-[350px]">
           <label class="block text-xs font-bold text-gray-700 mb-1">İçerik</label>
           <div class="NgxEditor__Wrapper flex-1 flex flex-col border border-gray-200 rounded-lg overflow-hidden">
-             <ngx-editor-menu [editor]="editor" [toolbar]="toolbar"></ngx-editor-menu>
+             <ngx-editor-menu [editor]="editor" [toolbar]="toolbar" [colorPresets]="customColors"></ngx-editor-menu>
              <ngx-editor [editor]="editor" [(ngModel)]="content" [placeholder]="'Duyuru metni...'"></ngx-editor>
           </div>
         </div>
@@ -179,14 +187,20 @@ import { Editor, Toolbar, NgxEditorModule } from 'ngx-editor';
     ::ng-deep .NgxEditor__MenuItem {
       color: #374151 !important;
     }
-    /* Editör ve önizlemede medya ortalama */
+    /* Editör ve önizlemede medya serbest akışı ve boyutlandırma */
     ::ng-deep .NgxEditor img,
     ::ng-deep .NgxEditor video {
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
+      display: inline-block;
+      margin: 4px;
       max-width: 100%;
       border-radius: 8px;
+      resize: both;
+      overflow: hidden;
+      box-sizing: border-box;
+      outline: none;
+    }
+    ::ng-deep .NgxEditor img:active {
+      border: 1px dashed #ccc;
     }
   `]
 })
@@ -199,6 +213,7 @@ export class AnnouncementFormComponent implements OnInit, OnDestroy {
   startDate: string | null = null;
   endDate: string | null = null;
   onceDurationMinutes: number | null = null;
+  layoutWidth: string = 'Standart';
 
   editId: number | null = null;
   isUploading = false;
@@ -213,6 +228,17 @@ export class AnnouncementFormComponent implements OnInit, OnDestroy {
     ['link', 'image'],
     ['text_color', 'background_color'],
     ['align_left', 'align_center', 'align_right', 'align_justify'],
+  ];
+
+  customColors = [
+    '#000000', '#333333', '#666666', '#999999', '#CCCCCC', '#FFFFFF',
+    '#FF0000', '#FF9900', '#FFFF00', '#00FF00', '#00FFFF', '#0000FF', '#9900FF', '#FF00FF',
+    '#F4CCCC', '#FCE5CD', '#FFF2CC', '#D9EAD3', '#D0E0E3', '#CFE2F3', '#D9D2E9', '#EAD1DC',
+    '#EA9999', '#F9CB9C', '#FFE599', '#B6D7A8', '#A2C4C9', '#9FC5E8', '#B4A7D6', '#D5A6BD',
+    '#E06666', '#F6B26B', '#FFD966', '#93C47D', '#76A5AF', '#6FA8DC', '#8E7CC3', '#C27BA0',
+    '#CC0000', '#E69138', '#F1C232', '#6AA84F', '#45818E', '#3D85C6', '#674EA7', '#A64D79',
+    '#990000', '#B45F06', '#BF9000', '#38761D', '#134F5C', '#0B5394', '#351C75', '#741B47',
+    '#660000', '#783F04', '#7F6000', '#274E13', '#0C343D', '#073763', '#20124D', '#4C1130'
   ];
 
   private announcementService = inject(AnnouncementService);
@@ -270,6 +296,7 @@ export class AnnouncementFormComponent implements OnInit, OnDestroy {
     this.startDate = null;
     this.endDate = null;
     this.onceDurationMinutes = null;
+    this.layoutWidth = 'Standart';
   }
 
   getSubmitButtonText(): string {
@@ -283,7 +310,8 @@ export class AnnouncementFormComponent implements OnInit, OnDestroy {
       this.announcementService.triggerPreview({
         title: this.title,
         content: this.content,
-        format: this.format
+        format: this.format,
+        layoutWidth: this.layoutWidth
       } as any);
     }
   }
@@ -304,6 +332,7 @@ export class AnnouncementFormComponent implements OnInit, OnDestroy {
     this.startDate = toLocalDatetime(ann.startDate || ann.StartDate);
     this.endDate = toLocalDatetime(ann.endDate || ann.EndDate);
     this.onceDurationMinutes = ann.onceDurationMinutes ?? ann.OnceDurationMinutes ?? null;
+    this.layoutWidth = ann.layoutWidth || ann.LayoutWidth || 'Standart';
   }
 
   triggerFileInput(fileInput: HTMLInputElement, type: 'image' | 'video') {
@@ -345,7 +374,8 @@ export class AnnouncementFormComponent implements OnInit, OnDestroy {
       endDate: this.endDate ? new Date(this.endDate).toISOString() : null,
       onceDurationMinutes: (this.frequency === 'Once' && this.canSetDuration() && this.onceDurationMinutes)
         ? Number(this.onceDurationMinutes)
-        : null
+        : null,
+      layoutWidth: this.layoutWidth
     };
 
     if (this.editId) {

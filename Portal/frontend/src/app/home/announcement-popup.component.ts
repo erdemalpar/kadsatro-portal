@@ -1,6 +1,7 @@
-import { Component, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import * as signalR from '@microsoft/signalr';
+import { DomSanitizer } from '@angular/platform-browser';
 
 const DUYURU_API = 'http://localhost:5005/api/announcement';
 const DUYURU_HUB = 'http://localhost:5005/announcementHub';
@@ -49,8 +50,8 @@ const POLLING_MS  = 30_000;
 
         <!-- İçerik -->
         <div [ngClass]="icerikDivClass()"
-             class="flex-1 overflow-y-auto p-6 lg:p-10 flex flex-col">
-          <div [ngClass]="icerikIcClass()">
+             class="flex-1 min-h-0 overflow-y-scroll overflow-x-hidden p-6 lg:p-10 flex flex-col custom-scrollbar">
+          <div [ngClass]="icerikIcClass()" class="shrink-0">
             <span *ngIf="current()?.format !== 'Story'"
                   [ngClass]="etiketClass()"
                   class="inline-block px-3 py-1 text-xs font-bold rounded-full mb-6">
@@ -58,8 +59,8 @@ const POLLING_MS  = 30_000;
             </span>
             <h1 [ngClass]="h1Class()" class="font-extrabold mb-8">{{ current()?.title }}</h1>
             <div [ngClass]="proseClass()"
-                 class="prose max-w-none w-full"
-                 [innerHTML]="current()?.content"></div>
+                 class="prose max-w-none w-full break-words overflow-x-auto"
+                 [innerHTML]="safeContent()"></div>
 
             <!-- Cinematic alt -->
             <div *ngIf="current()?.format === 'Cinematic'" class="mt-16 flex flex-col items-center gap-4">
@@ -101,7 +102,7 @@ const POLLING_MS  = 30_000;
           </button>
         </div>
       </div>
-      <div class="text-sm text-gray-600 line-clamp-3 prose" [innerHTML]="current()?.content"></div>
+      <div class="text-sm text-gray-600 line-clamp-3 prose" [innerHTML]="safeContent()"></div>
       <div class="mt-4 flex justify-end">
         <button (click)="kapat()"
                 class="px-4 py-1.5 bg-indigo-50 text-indigo-600 rounded-md text-xs font-bold hover:bg-indigo-100 transition-colors">
@@ -109,11 +110,43 @@ const POLLING_MS  = 30_000;
         </button>
       </div>
     </div>
-  `
+  `,
+  styles: [`
+    :host ::ng-deep .prose img,
+    :host ::ng-deep .prose video {
+      display: inline-block !important;
+      margin: 4px !important;
+      max-width: 100%;
+      border-radius: 12px;
+      vertical-align: middle;
+    }
+    :host ::ng-deep .custom-scrollbar {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(156, 163, 175, 0.8) transparent;
+    }
+    :host ::ng-deep .custom-scrollbar::-webkit-scrollbar {
+      width: 8px !important;
+      height: 8px !important;
+      display: block !important;
+      -webkit-appearance: none !important;
+    }
+    :host ::ng-deep .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent !important;
+    }
+    :host ::ng-deep .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(156, 163, 175, 0.8) !important;
+      border-radius: 10px !important;
+    }
+    :host ::ng-deep .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(107, 114, 128, 0.9);
+    }
+  `]
 })
 export class AnnouncementPopupComponent implements OnInit, OnDestroy {
   kuyruk       = signal<any[]>([]);
   current      = signal<any | null>(null);
+  private sanitizer = inject(DomSanitizer);
+  safeContent = computed(() => this.sanitizer.bypassSecurityTrustHtml(this.current()?.content || ''));
 
   private pollingId:   any = null;
   private hub: signalR.HubConnection | null = null;
@@ -213,11 +246,18 @@ export class AnnouncementPopupComponent implements OnInit, OnDestroy {
   overlayClass()    { return this.fmt === 'Cinematic' ? 'p-0' : 'p-4'; }
 
   containerClass(): string {
+    const layout = this.current()?.layoutWidth || this.current()?.LayoutWidth || 'Standart';
+
     if (this.fmt === 'Cinematic')
       return 'animate-[fadeIn_0.5s_ease-in-out] bg-gradient-to-b from-gray-900 to-black rounded-none w-full h-full max-w-full max-h-full';
     if (this.fmt === 'Story')
       return 'animate-[fadeIn_0.3s_ease-out] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 rounded-[2.5rem] w-full max-w-md h-[85vh] border-4 border-gray-900';
-    return 'animate-[fadeIn_0.3s_ease-out] bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl w-full max-w-4xl max-h-[90vh]';
+    
+    // Glassmorphism or default
+    let base = 'animate-[fadeIn_0.3s_ease-out] bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl w-full max-h-[90vh] ';
+    if (layout === 'Geniş') return base + 'max-w-6xl';
+    if (layout === 'Tam Ekran') return base + 'max-w-[95vw]';
+    return base + 'max-w-4xl';
   }
 
   headerClass(): string {
@@ -225,11 +265,11 @@ export class AnnouncementPopupComponent implements OnInit, OnDestroy {
   }
 
   baslikRenk(): string {
-    return this.fmt === 'Story' ? 'text-white drop-shadow-md' : 'text-gray-800';
+    return this.fmt === 'Story' ? '!text-white drop-shadow-md' : '!text-gray-800';
   }
 
   badgeClass(): string {
-    return this.fmt === 'Story' ? 'bg-white/10 text-white' : 'bg-indigo-50 text-indigo-600';
+    return this.fmt === 'Story' ? 'bg-white/10 !text-white' : 'bg-indigo-50 !text-indigo-600';
   }
 
   kapatBtnClass(): string {
@@ -243,26 +283,35 @@ export class AnnouncementPopupComponent implements OnInit, OnDestroy {
   }
 
   icerikIcClass(): string {
-    if (this.fmt === 'Cinematic') return 'w-full max-w-4xl mx-auto flex flex-col items-center';
-    if (this.fmt === 'Story')     return 'w-full flex-1 flex flex-col';
-    return 'w-full max-w-3xl mx-auto';
+    const layout = this.current()?.layoutWidth || this.current()?.LayoutWidth || 'Standart';
+    let baseClass = 'w-full mx-auto ';
+    if (this.fmt === 'Story') return baseClass + 'flex-1 flex flex-col';
+
+    if (this.fmt === 'Cinematic') {
+       baseClass += 'flex flex-col items-center shrink-0 ';
+       if (layout === 'Geniş') return baseClass + 'max-w-6xl px-8';
+       if (layout === 'Tam Ekran') return baseClass + 'max-w-[95vw] px-12';
+       return baseClass + 'max-w-4xl';
+    }
+
+    return baseClass;
   }
 
   etiketClass(): string {
-    if (this.fmt === 'Cinematic') return 'bg-white/10 text-gray-300 border border-white/10 tracking-widest uppercase';
-    return 'bg-indigo-50/80 text-indigo-700';
+    if (this.fmt === 'Cinematic') return 'bg-white/10 !text-gray-300 border border-white/10 tracking-widest uppercase';
+    return 'bg-indigo-50/80 !text-indigo-700';
   }
 
   h1Class(): string {
-    if (this.fmt === 'Cinematic') return 'text-5xl lg:text-7xl text-white tracking-tighter drop-shadow-2xl';
-    if (this.fmt === 'Story')     return 'text-3xl text-white drop-shadow-lg leading-tight mt-auto';
-    return 'text-3xl lg:text-4xl text-gray-900';
+    if (this.fmt === 'Cinematic') return 'text-5xl lg:text-7xl !text-white tracking-tighter drop-shadow-2xl';
+    if (this.fmt === 'Story')     return 'text-3xl !text-white drop-shadow-lg leading-tight mt-auto';
+    return 'text-3xl lg:text-4xl !text-gray-900';
   }
 
   proseClass(): string {
-    if (this.fmt === 'Cinematic') return 'prose-invert prose-xl [&_*]:!text-gray-100 [&_a]:!text-blue-400';
-    if (this.fmt === 'Story')     return 'prose-invert prose-p:text-white/90 prose-headings:text-white';
-    return 'prose-indigo prose-img:rounded-xl prose-img:shadow-md';
+    if (this.fmt === 'Cinematic') return 'prose-invert prose-xl text-left [&_*]:!text-gray-100 [&_h1]:!text-white [&_h2]:!text-white [&_h3]:!text-white [&_h4]:!text-white [&_a]:!text-blue-400';
+    if (this.fmt === 'Story')     return 'prose-invert prose-p:!text-white/90 prose-headings:!text-white';
+    return 'prose-indigo prose-img:rounded-xl prose-img:shadow-md prose-p:!text-gray-800 prose-headings:!text-gray-900';
   }
 
   footerClass(): string {

@@ -26,16 +26,26 @@ import { PaginatorModule } from 'primeng/paginator';
           </div>
         </div>
 
-        <!-- Arama Çubuğu -->
-        <div class="relative max-w-sm w-full">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-            </svg>
+        <!-- Filtre ve Arama Çubuğu -->
+        <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+          
+          <select [(ngModel)]="filterStatus" (ngModelChange)="first = 0" 
+                  class="block w-full sm:w-44 px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-gray-50 transition-colors">
+            <option value="active">Yayında Olanlar</option>
+            <option value="expired">Süresi Dolanlar</option>
+            <option value="all">Tüm Duyurular</option>
+          </select>
+
+          <div class="relative max-w-sm w-full">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <input type="text" (input)="onSearch($event)"
+                   class="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-gray-50 transition-colors" 
+                   placeholder="Başlık, kategori, statü ara...">
           </div>
-          <input type="text" (input)="onSearch($event)"
-                 class="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-gray-50 transition-colors" 
-                 placeholder="Başlık, kategori, statü ara...">
         </div>
       </div>
 
@@ -195,7 +205,8 @@ import { PaginatorModule } from 'primeng/paginator';
           [first]="first" 
           [rows]="rows" 
           [totalRecords]="filteredAnnouncements.length" 
-          [rowsPerPageOptions]="[5, 10, 20]"
+          [rowsPerPageOptions]="[6, 25, 50, 100]"
+          dropdownAppendTo="body"
           styleClass="bg-white border-t border-gray-100 p-2">
       </p-paginator>
 
@@ -275,12 +286,13 @@ export class ArchiveComponent implements OnInit, OnDestroy {
   isReadersModalOpen = false;
   readers: any[] = [];
   searchQuery: string = '';
+  filterStatus: 'active' | 'expired' | 'all' = 'active';
 
   isConfirmModalOpen = false;
   confirmModalConfig: any = {};
 
   first: number = 0;
-  rows: number = 10;
+  rows: number = 6;
 
   private announcementService = inject(AnnouncementService);
   private authService = inject(AuthService);
@@ -297,10 +309,23 @@ export class ArchiveComponent implements OnInit, OnDestroy {
   }
 
   get filteredAnnouncements() {
-    if (!this.searchQuery) return this.announcements;
+    let list = this.announcements;
+    
+    if (this.filterStatus !== 'all') {
+      const now = new Date().getTime();
+      list = list.filter(a => {
+        const end = a.endDate ? new Date(a.endDate).getTime() : null;
+        const isExpired = end !== null && end < now;
+        if (this.filterStatus === 'active') return !isExpired;
+        if (this.filterStatus === 'expired') return isExpired;
+        return true;
+      });
+    }
+
+    if (!this.searchQuery) return list;
     const lowerQ = this.searchQuery.toLowerCase();
     
-    return this.announcements.filter(a => {
+    return list.filter(a => {
        const statusText = this.getStatusText(a.status).toLowerCase();
        const formatText = this.getFormatText(a.format || '').toLowerCase();
        const freqText = this.getFrequencyText(a.frequency || '').toLowerCase();

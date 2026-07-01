@@ -55,6 +55,7 @@ namespace Duyuru.API.Services
                 Title = dto.Title,
                 Content = dto.Content,
                 Format = dto.Format,
+                LayoutWidth = dto.LayoutWidth ?? "Standart",
                 CategoryId = dto.CategoryId,
                 CreatedById = dto.CreatedById,
                 Status = initialStatus,
@@ -158,6 +159,7 @@ namespace Duyuru.API.Services
             announcement.Title = dto.Title;
             announcement.Content = dto.Content;
             announcement.Format = dto.Format;
+            announcement.LayoutWidth = dto.LayoutWidth ?? "Standart";
             announcement.CategoryId = dto.CategoryId;
             announcement.StartDate = dto.StartDate;
             announcement.EndDate = dto.EndDate;
@@ -441,7 +443,8 @@ namespace Duyuru.API.Services
                 StartDate: a.StartDate,
                 EndDate: a.EndDate,
                 Frequency: a.Frequency.ToString(),
-                OnceDurationMinutes: a.OnceDurationMinutes
+                OnceDurationMinutes: a.OnceDurationMinutes,
+                LayoutWidth: a.LayoutWidth
             );
         }
     }

@@ -118,21 +118,21 @@ export class LayoutComponent {
 
   currentRole = this.authService.currentRole;
   isMobileMenuOpen = signal(false);
-  
-  sidebarWidth = signal(Math.round(window.innerWidth * 0.35)); // Ekranın %35'i
+
+  sidebarWidth = signal(Math.round(window.innerWidth * 0.25)); // Ekranın %45'i
   private isResizing = false;
 
   @HostListener('document:mousemove', ['$event'])
   onMouseMove(event: MouseEvent) {
     if (!this.isResizing) return;
-    
+
     // Minimum %20, maksimum %50 viewport genişliği
     let newWidth = event.clientX;
     const minW = Math.round(window.innerWidth * 0.20);
     const maxW = Math.round(window.innerWidth * 0.50);
     if (newWidth < minW) newWidth = minW;
     if (newWidth > maxW) newWidth = maxW;
-    
+
     this.sidebarWidth.set(newWidth);
   }
 
@@ -152,7 +152,7 @@ export class LayoutComponent {
     const role = this.currentRole();
     const storedName = localStorage.getItem('dys_username');
     if (storedName) return storedName;
-    
+
     if (role === 'Admin') return 'Ahmet Yönetici';
     if (role === 'Editor') return 'Ayşe Editör';
     if (role === 'Moderator') return 'Mehmet Moderatör';

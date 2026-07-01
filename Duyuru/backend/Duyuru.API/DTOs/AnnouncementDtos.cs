@@ -11,7 +11,8 @@ namespace Duyuru.API.DTOs
         DateTime? StartDate,
         DateTime? EndDate,
         string Frequency,
-        int? OnceDurationMinutes
+        int? OnceDurationMinutes,
+        string? LayoutWidth
     );
 
     public record UpdateAnnouncementStatusDto(
@@ -27,7 +28,8 @@ namespace Duyuru.API.DTOs
         DateTime? StartDate,
         DateTime? EndDate,
         string Frequency,
-        int? OnceDurationMinutes
+        int? OnceDurationMinutes,
+        string? LayoutWidth
     );
 
     public record DashboardStatsDto(
@@ -58,6 +60,7 @@ namespace Duyuru.API.DTOs
         DateTime? StartDate,
         DateTime? EndDate,
         string Frequency,
-        int? OnceDurationMinutes
+        int? OnceDurationMinutes,
+        string? LayoutWidth
     );
 }
