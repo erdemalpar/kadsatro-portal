@@ -38,135 +38,139 @@ import { Subscription } from 'rxjs';
         </div>
       </div>
 
-      <!-- Scrollable Tablo Container (Mobil Uyumluluk İçin) -->
+      <!-- Scrollable Tablo Container -->
       <div class="flex-1 overflow-x-auto overflow-y-auto">
-        <table class="w-full min-w-[900px] text-left border-collapse">
+        <table class="w-full text-left border-collapse" style="min-width:960px">
           <thead>
-            <tr class="bg-gray-50/50">
-              <th class="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider w-32 border-b border-gray-100">Tarih</th>
-              <th class="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100">Konu Başlığı & Statü Notları</th>
-              <th class="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider w-32 border-b border-gray-100 text-center">Kategori</th>
-              <th class="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider w-48 border-b border-gray-100">Statü</th>
-              <th class="py-4 px-3 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100 text-right" style="white-space:nowrap;">İşlem</th>
+            <tr class="bg-gray-50 border-b border-gray-200">
+              <th class="py-3 px-5 text-[11px] font-bold text-gray-400 uppercase tracking-widest w-28">Tarih</th>
+              <th class="py-3 px-5 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Duyuru</th>
+              <th class="py-3 px-5 text-[11px] font-bold text-gray-400 uppercase tracking-widest w-36 text-center">Statü</th>
+              <th class="py-3 px-5 text-[11px] font-bold text-gray-400 uppercase tracking-widest text-right" style="white-space:nowrap">İşlem</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
             <!-- Boş Durum -->
             <tr *ngIf="announcements.length === 0">
-              <td colspan="5" class="py-12 text-center text-gray-500 text-sm">
-                Gösterilecek kayıt bulunamadı.
+              <td colspan="4" class="py-16 text-center">
+                <div class="flex flex-col items-center gap-3 text-gray-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                  <span class="text-sm font-medium">Gösterilecek kayıt bulunamadı.</span>
+                </div>
               </td>
             </tr>
 
             <!-- Satırlar -->
-            <tr *ngFor="let item of filteredAnnouncements" class="hover:bg-gray-50/50 transition-colors group">
-              <!-- Tarih -->
-              <td class="py-4 px-6 align-top">
-                <div class="text-sm font-semibold text-gray-700">{{ item.createdAt | date:'dd.MM.yyyy' }}</div>
-                <div class="text-xs text-gray-400 mt-0.5">{{ item.createdAt | date:'HH:mm' }}</div>
-              </td>
-              
-              <!-- Konu -->
-              <td class="py-4 px-6 align-top">
-                <div class="text-sm font-bold text-gray-900 mb-1 group-hover:text-[var(--brand-color)] transition-colors">{{ item.title }}</div>
-                <div class="text-[11px] text-gray-500 mb-2">{{ item.createdByName }}</div>
+            <tr *ngFor="let item of filteredAnnouncements" class="hover:bg-slate-50 transition-colors group">
 
-                <!-- Ayar etiketleri -->
-                <div class="flex flex-wrap gap-1.5 mt-1.5">
+              <!-- Tarih -->
+              <td class="py-4 px-5 align-middle">
+                <div class="text-sm font-bold text-gray-800 tabular-nums">{{ item.createdAt | date:'dd.MM.yyyy' }}</div>
+                <div class="text-xs text-gray-400 mt-0.5 tabular-nums">{{ item.createdAt | date:'HH:mm' }}</div>
+              </td>
+
+              <!-- Duyuru Başlığı + Meta (tek satır etiketler) -->
+              <td class="py-4 px-5 align-middle">
+                <div class="text-sm font-bold text-gray-900 mb-0.5 group-hover:text-[var(--brand-color)] transition-colors">
+                  {{ item.title }}
+                </div>
+                <div class="text-[11px] text-gray-400 mb-2">{{ item.createdByName }}</div>
+
+                <!-- Meta etiketleri — tek satır, yatay scroll -->
+                <div class="flex flex-nowrap items-center gap-2 overflow-x-auto" style="scrollbar-width:none;-ms-overflow-style:none">
                   <!-- Format -->
-                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-600 border border-indigo-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm0 8a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zm12 0a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/>
-                    </svg>
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-600 border border-indigo-100 whitespace-nowrap shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm0 8a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zm12 0a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
                     {{ getFormatText(item.format) }}
                   </span>
 
                   <!-- Sıklık -->
-                  <div class="flex items-center gap-2">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border"
-                          [ngClass]="{
-                            'bg-purple-50 text-purple-700 border-purple-200': item.frequency === 'Once',
-                            'bg-orange-50 text-orange-700 border-orange-200': item.frequency === 'Daily',
-                            'bg-teal-50 text-teal-700 border-teal-200': item.frequency === 'Always'
-                          }">
-                      <svg *ngIf="item.frequency === 'Once'" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                      <svg *ngIf="item.frequency === 'Daily'" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                      <svg *ngIf="item.frequency === 'Always'" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                      {{ getFrequencyText(item.frequency) }} {{ item.frequency === 'Once' && (item.onceDurationMinutes || $any(item).OnceDurationMinutes) ? '(' + (item.onceDurationMinutes || $any(item).OnceDurationMinutes) + ' dk)' : '' }}
-                    </span>
-                  </div>
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold border whitespace-nowrap shrink-0"
+                        [ngClass]="{
+                          'bg-purple-50 text-purple-700 border-purple-200': item.frequency === 'Once',
+                          'bg-orange-50 text-orange-700 border-orange-200': item.frequency === 'Daily',
+                          'bg-teal-50 text-teal-700 border-teal-200': item.frequency === 'Always'
+                        }">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    {{ getFrequencyText(item.frequency) }}{{ item.frequency === 'Once' && (item.onceDurationMinutes || $any(item).OnceDurationMinutes) ? ' (' + (item.onceDurationMinutes || $any(item).OnceDurationMinutes) + ' dk)' : '' }}
+                  </span>
 
-
-                  <!-- Yayın aralığı -->
+                  <!-- Yayın Aralığı -->
                   <span *ngIf="item.startDate || item.endDate"
-                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-teal-50 text-teal-600 border border-teal-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
-                    {{ item.startDate ? (item.startDate | date:'dd.MM.yy HH:mm') : '—' }}
-                    →
-                    {{ item.endDate ? (item.endDate | date:'dd.MM.yy HH:mm') : '∞' }}
+                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-teal-50 text-teal-600 border border-teal-100 whitespace-nowrap shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    {{ item.startDate ? (item.startDate | date:'dd.MM.yy HH:mm') : '—' }} → {{ item.endDate ? (item.endDate | date:'dd.MM.yy HH:mm') : '∞' }}
+                  </span>
+
+                  <!-- Kategori -->
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-gray-100 text-gray-600 border border-gray-200 whitespace-nowrap shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a2 2 0 012-2h2z" /></svg>
+                    {{ item.categoryName }}
                   </span>
                 </div>
 
-                <!-- Ret Sebebi (Reddedildiyse) -->
-                <div *ngIf="item.status === 'Rejected'" class="inline-flex mt-2 p-2 bg-red-50 border border-red-100 rounded-md text-red-600 text-[11px]">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                  <strong>Not:</strong>&nbsp;{{ item.rejectionReason || 'Eksik bilgi nedeniyle reddedildi.' }}
+                <!-- Ret Sebebi -->
+                <div *ngIf="item.status === 'Rejected'" class="mt-2 inline-flex items-start gap-1.5 px-2.5 py-1.5 bg-red-50 border border-red-100 rounded-md text-red-600 text-[11px] leading-relaxed max-w-xs">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mt-px shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <span><strong>Not:</strong> {{ item.rejectionReason || 'Eksik bilgi nedeniyle reddedildi.' }}</span>
                 </div>
               </td>
 
-
-              <!-- Kategori -->
-              <td class="py-4 px-6 align-top text-center">
-                <span class="inline-flex items-center justify-center px-2.5 py-1 rounded-md text-[11px] font-bold bg-gray-100 text-gray-600 border border-gray-200 shadow-sm">
-                  {{ item.categoryName }}
-                </span>
-              </td>
-
               <!-- Statü -->
-              <td class="py-4 px-6 align-top">
-                <span [class]="getStatusClass(item.status)" class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold border">
-                  <!-- İkonlar statüye göre -->
-                  <svg *ngIf="item.status === 'Published'" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                  <svg *ngIf="item.status === 'PendingModerator' || item.status === 'PendingEditor'" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                  <svg *ngIf="item.status === 'Rejected'" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                  <svg *ngIf="item.status === 'Withdrawn'" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
-                  
+              <td class="py-4 px-5 align-middle text-center">
+                <span [class]="getStatusClass(item.status)" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border">
+                  <svg *ngIf="item.status === 'Published'" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <svg *ngIf="item.status === 'PendingModerator' || item.status === 'PendingEditor'" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <svg *ngIf="item.status === 'Rejected'" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <svg *ngIf="item.status === 'Withdrawn'" xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
                   {{ getStatusText(item.status) }}
                 </span>
               </td>
 
-              <!-- Aksiyon İşlem Butonları -->
-              <td class="py-4 px-3 align-middle text-right" style="white-space:nowrap;">
+              <!-- Aksiyon Butonları -->
+              <td class="py-4 px-5 align-middle" style="white-space:nowrap">
                 <div class="flex flex-nowrap gap-1.5 justify-end items-center">
-                  <button (click)="preview(item)" class="py-1 px-3 text-[11px] font-bold border border-gray-200 text-gray-600 rounded-md hover:bg-gray-50 transition-colors">
+
+                  <button (click)="preview(item)" title="Önizle"
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold rounded-md border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                     Önizle
                   </button>
-                  
+
                   <ng-container *ngIf="canEditOrDelete(item)">
-                    <button (click)="edit(item)" class="py-1 px-3 text-[11px] font-bold border border-blue-200 bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100 transition-colors">
+                    <button (click)="edit(item)" title="Düzenle"
+                      class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold rounded-md border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 transition-all">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                       Düzenle
                     </button>
-                    <button (click)="deleteItem(item)" class="py-1 px-3 text-[11px] font-bold border border-red-200 bg-red-50 text-red-700 rounded-md hover:bg-red-100 transition-colors">
+                    <button (click)="deleteItem(item)" title="Sil"
+                      class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold rounded-md border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 transition-all">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                       Sil
                     </button>
                   </ng-container>
 
-                  <button *ngIf="canWithdraw(item)" (click)="withdraw(item)" class="py-1 px-3 text-[11px] font-bold border border-orange-200 bg-orange-50 text-orange-700 rounded-md hover:bg-orange-100 transition-colors">
+                  <button *ngIf="canWithdraw(item)" (click)="withdraw(item)" title="Geri Çek"
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold rounded-md border border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
                     Geri Çek
                   </button>
 
-                  <button *ngIf="canViewReaders(item)" (click)="openReadersModal(item)" class="py-1 px-3 text-[11px] font-bold border border-indigo-200 bg-indigo-50 text-indigo-700 rounded-md hover:bg-indigo-100 transition-colors">
+                  <button *ngIf="canViewReaders(item)" (click)="openReadersModal(item)" title="Kimler Okudu?"
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold rounded-md border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                     Kimler Okudu?
                   </button>
-                  
-                  <!-- Admin, Editör ve Moderatör Onay/Red İşlemleri -->
+
                   <ng-container *ngIf="canApprove(item)">
-                    <button (click)="approve(item)" class="py-1 px-3 text-[11px] font-bold border border-green-200 bg-green-50 text-green-700 rounded-md hover:bg-green-100 transition-colors">
+                    <button (click)="approve(item)" title="Onayla"
+                      class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold rounded-md border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 transition-all">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
                       Onayla
                     </button>
-                    <button (click)="reject(item)" class="py-1 px-3 text-[11px] font-bold border border-red-200 bg-red-50 text-red-700 rounded-md hover:bg-red-100 transition-colors">
+                    <button (click)="reject(item)" title="Reddet"
+                      class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold rounded-md border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 transition-all">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                       Reddet
                     </button>
                   </ng-container>
