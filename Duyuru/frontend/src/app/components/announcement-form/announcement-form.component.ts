@@ -8,13 +8,16 @@ import { QuillModule } from 'ngx-quill';
 import * as QuillNamespace from 'quill';
 
 const Quill: any = (QuillNamespace as any).default || QuillNamespace;
+(window as any).Quill = Quill;
+
 const BlockEmbed = Quill.import('blots/block/embed');
 
 class CustomVideoBlot extends BlockEmbed {
   static create(value: any) {
     const node = super.create();
     node.setAttribute('controls', 'true');
-    node.setAttribute('style', 'max-width: 100%; border-radius: 8px; margin: 4px;');
+    node.setAttribute('contenteditable', 'false');
+    node.setAttribute('style', 'max-width: 100%; border-radius: 8px; margin: 4px; display: inline-block;');
     node.setAttribute('src', value);
     return node;
   }
@@ -27,8 +30,16 @@ class CustomVideoBlot extends BlockEmbed {
 Quill.register(CustomVideoBlot, true);
 
 // @ts-ignore
-import ResizeModule from 'quill-resize-module';
-Quill.register('modules/resize', ResizeModule);
+import BlotFormatter, { ImageSpec, IframeVideoSpec, UnclickableBlotSpec } from '@enzedonline/quill-blot-formatter2';
+
+class NativeVideoSpec extends UnclickableBlotSpec {
+    constructor(formatter: any) {
+        super(formatter);
+        this.selector = 'video';
+    }
+}
+
+Quill.register('modules/blotFormatter', BlotFormatter);
 
 @Component({
   selector: 'app-announcement-form',
@@ -280,8 +291,12 @@ export class AnnouncementFormComponent implements OnInit, OnDestroy {
       ['link', 'image', 'video'],
       ['clean']
     ],
-    resize: {
-      locale: {}
+    blotFormatter: {
+      specs: [
+        ImageSpec,
+        IframeVideoSpec,
+        NativeVideoSpec
+      ]
     }
   };
 
@@ -409,10 +424,10 @@ export class AnnouncementFormComponent implements OnInit, OnDestroy {
 
     if (url) {
       if (this.currentUploadType === 'image') {
-        this.content += `<br><img src="${url}" style="max-width:100%; border-radius: 8px;"><br>`;
+        this.content += `<p><img src="${url}" style="border-radius: 8px; max-width: 100%;"></p>`;
       } else {
-        // Quill custom blot ile eşleşebilmesi için video tag'ını veriyoruz.
-        this.content += `<br><video src="${url}"></video><br>`;
+        // Quill CustomVideoBlot ile eşleşebilmesi için video tag'ını veriyoruz.
+        this.content += `<p><video src="${url}"></video></p>`;
       }
     } else {
       this.alertService.error("Dosya yüklenemedi!");
