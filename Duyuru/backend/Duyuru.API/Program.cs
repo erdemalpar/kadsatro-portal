@@ -25,12 +25,15 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Dependency Injection for Services
 builder.Services.AddScoped<IAnnouncementService, AnnouncementService>();
 
-// CORS Policy for Micro-Frontend (Port 4205)
+// CORS Policy for Micro-Frontend (Duyuru: 4202, Portal: 4200)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:4205")
+        policy.WithOrigins(
+                "http://localhost:4202",  // Duyuru frontend
+                "http://localhost:4200"   // Portal (announcement-popup)
+              )
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
