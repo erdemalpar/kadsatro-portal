@@ -23,6 +23,15 @@ namespace Duyuru.API.Models
         // Once sıklığında gösterim süresi (dakika). Null ise manuel kapatma gerekir.
         public int? OnceDurationMinutes { get; set; }
 
+        // Başlık Özelleştirmeleri
+        public string? TitleFontFamily { get; set; }
+        public string? TitleFontSize { get; set; }
+        public bool TitleIsBold { get; set; } = false;
+        public string? TitleColor { get; set; }
+
+        // Yayına girme tekrarlama sıklığı (Örn: None, Yearly, Monthly)
+        public string RepeatInterval { get; set; } = "None";
+
 
         public string? RejectionReason { get; set; }
         

@@ -4,12 +4,36 @@ import { FormsModule } from '@angular/forms';
 import { AnnouncementService } from '../../services/announcement.service';
 import { AuthService } from '../../services/auth.service';
 import { AlertService } from '../../services/alert.service';
-import { Editor, Toolbar, NgxEditorModule } from 'ngx-editor';
+import { QuillModule } from 'ngx-quill';
+import * as QuillNamespace from 'quill';
+
+const Quill: any = (QuillNamespace as any).default || QuillNamespace;
+const BlockEmbed = Quill.import('blots/block/embed');
+
+class CustomVideoBlot extends BlockEmbed {
+  static create(value: any) {
+    const node = super.create();
+    node.setAttribute('controls', 'true');
+    node.setAttribute('style', 'max-width: 100%; border-radius: 8px; margin: 4px;');
+    node.setAttribute('src', value);
+    return node;
+  }
+  static value(node: any) {
+    return node.getAttribute('src');
+  }
+}
+(CustomVideoBlot as any)['blotName'] = 'nativeVideo';
+(CustomVideoBlot as any)['tagName'] = 'video';
+Quill.register(CustomVideoBlot, true);
+
+// @ts-ignore
+import ResizeModule from 'quill-resize-module';
+Quill.register('modules/resize', ResizeModule);
 
 @Component({
   selector: 'app-announcement-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgxEditorModule],
+  imports: [CommonModule, FormsModule, QuillModule],
   template: `
     <div class="p-4 flex flex-col h-full bg-white">
       
@@ -17,8 +41,28 @@ import { Editor, Toolbar, NgxEditorModule } from 'ngx-editor';
         <!-- Başlık -->
         <div>
           <label class="block text-xs font-bold text-gray-700 mb-1">Başlık</label>
+          <div class="flex gap-2 mb-2 p-2 bg-gray-50 border border-gray-100 rounded-lg">
+            <select [(ngModel)]="titleFontFamily" class="border border-gray-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-400">
+              <option value="Inter">Varsayılan (Inter)</option>
+              <option value="'Times New Roman', Times, serif">Times New Roman</option>
+              <option value="Arial, Helvetica, sans-serif">Arial</option>
+              <option value="Verdana, Geneva, sans-serif">Verdana</option>
+              <option value="Tahoma, Geneva, sans-serif">Tahoma</option>
+              <option value="'Courier New', Courier, monospace">Courier New</option>
+            </select>
+            <select [(ngModel)]="titleFontSize" class="border border-gray-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-400">
+              <option value="1.5rem">Orta Boy</option>
+              <option value="1.875rem">Büyük</option>
+              <option value="2.25rem">Çok Büyük</option>
+              <option value="3rem">Ekstra Büyük</option>
+            </select>
+            <button (click)="titleIsBold = !titleIsBold" [class.bg-indigo-100]="titleIsBold" [class.text-indigo-700]="titleIsBold" class="border border-gray-200 rounded px-3 py-1 font-bold text-sm text-gray-600 hover:bg-gray-100 transition-colors">B</button>
+            <input type="color" [(ngModel)]="titleColor" class="w-8 h-8 rounded cursor-pointer border border-gray-200">
+          </div>
           <input type="text" [(ngModel)]="title" placeholder="Örn: 2026 Tatil Günleri"
-                 class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-color)]">
+                 [ngStyle]="{'font-family': titleFontFamily, 'font-size': titleFontSize, 'font-weight': titleIsBold ? 'bold' : 'normal', 'color': titleColor}"
+                 [ngClass]="(format === 'Cinematic' || format === 'Story') ? 'bg-gray-900 text-white border-gray-700' : 'bg-white border-gray-200'"
+                 class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--brand-color)] transition-colors duration-300">
         </div>
 
         <!-- Format Seçimi & Kategori Seçimi -->
@@ -60,7 +104,7 @@ import { Editor, Toolbar, NgxEditorModule } from 'ngx-editor';
         <!-- Yayın Süresi ve Gösterim Sıklığı -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label class="block text-xs font-bold text-gray-700 mb-1">Gös.Sık.</label>
+            <label class="block text-xs font-bold text-gray-700 mb-1">Okunma Sık.</label>
             <select [(ngModel)]="frequency" (ngModelChange)="onFrequencyChange()" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-color)]">
               <option value="Once">Sıklık</option>
               <option value="Daily">Günde Bir Kez</option>
@@ -77,49 +121,67 @@ import { Editor, Toolbar, NgxEditorModule } from 'ngx-editor';
           </div>
         </div>
 
-        <!-- "Sıklık" için Tekrarlama Süresi -->
-        <div *ngIf="frequency === 'Once' && canSetDuration()"
-             class="flex items-start gap-3 p-3 rounded-xl border border-indigo-200 bg-indigo-50/60 animate-[fadeIn_0.2s_ease-out]">
-          <div class="mt-0.5 shrink-0 w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <!-- Gelişmiş Ayarlar (Zamanlama ve Tekrar) -->
+        <div *ngIf="canSetDuration()"
+             class="flex items-start gap-4 p-4 rounded-xl border border-indigo-200 bg-indigo-50/60 animate-[fadeIn_0.2s_ease-out]">
+          <div class="mt-0.5 shrink-0 w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <div class="flex-1">
-            <label class="block text-xs font-bold text-gray-700 mb-1">
-              Tekrarlama Aralığı
-              <span class="ml-1 font-normal text-gray-400">(opsiyonel)</span>
-            </label>
-            <div class="flex items-center gap-2">
-              <input
-                type="number"
-                [(ngModel)]="onceDurationMinutes"
-                [min]="1"
-                [max]="1440"
-                placeholder="Örn: 1"
-                class="w-24 border border-indigo-200 rounded-lg px-3 py-2 text-sm font-semibold text-center
-                       focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white
-                       [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-              >
-              <span class="text-sm text-gray-500 font-medium">dakika</span>
-              <span *ngIf="onceDurationMinutes && onceDurationMinutes > 0"
-                    class="ml-2 text-xs font-semibold text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded-full">
-                Her {{ onceDurationMinutes }} dakikada bir
-              </span>
+          
+          <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Dakika Bazlı Sıklık -->
+            <div [class.opacity-50]="frequency !== 'Once'" class="transition-opacity duration-300">
+              <label class="block text-xs font-bold text-gray-800 mb-1.5">
+                Dakika Bazlı Sıklık
+                <span class="ml-1 font-normal text-gray-500">(opsiyonel)</span>
+              </label>
+              <div class="flex items-center gap-2">
+                <input
+                  type="number"
+                  [(ngModel)]="onceDurationMinutes"
+                  [disabled]="frequency !== 'Once'"
+                  [min]="1"
+                  [max]="1440"
+                  placeholder="Örn: 1"
+                  class="w-24 border border-indigo-200 rounded-lg px-3 py-2 text-sm font-semibold text-center
+                         focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white
+                         disabled:bg-gray-100 disabled:text-gray-400
+                         [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                >
+                <span class="text-sm text-gray-600 font-medium">dakika</span>
+              </div>
+              <p class="mt-1.5 text-[10px] text-gray-500 leading-snug">
+                Okunduktan seçilen dakika sonra tekrar gösterilir. (Sadece "Sıklık" modunda çalışır).
+              </p>
             </div>
-            <p class="mt-1 text-[10px] text-gray-400 leading-snug">
-              Seçilen dakika dolduğunda yayın tekrar gösterilir. Boş bırakılırsa tekrarlanmaz.
-            </p>
+
+            <!-- Takvimsel Tekrar (Yayın Tekrarı) -->
+            <div>
+              <label class="block text-xs font-bold text-gray-800 mb-1.5">
+                Yayın Tekrarı (Takvimsel)
+                <span class="ml-1 font-normal text-gray-500">(opsiyonel)</span>
+              </label>
+              <select [(ngModel)]="repeatInterval" class="w-full border border-indigo-200 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white text-gray-700">
+                <option value="None">Tekrar Yok</option>
+                <option value="Yearly">Her Yıl (Başlangıç tarihinde)</option>
+                <option value="Monthly">Her Ay (Başlangıç tarihinde)</option>
+              </select>
+              <p class="mt-1.5 text-[10px] text-gray-500 leading-snug">
+                Örn: Sadece 29 Ekim'lerde otomatik yayınlansın istiyorsanız "Her Yıl" seçin.
+              </p>
+            </div>
           </div>
         </div>
 
-        <!-- İçerik (Ngx-Editor) -->
+        <!-- İçerik (Quill) -->
         <div class="flex-1 flex flex-col min-h-[350px]">
           <label class="block text-xs font-bold text-gray-700 mb-1">İçerik</label>
-          <div class="NgxEditor__Wrapper flex-1 flex flex-col border border-gray-200 rounded-lg overflow-hidden">
-             <ngx-editor-menu [editor]="editor" [toolbar]="toolbar" [colorPresets]="customColors"></ngx-editor-menu>
-             <ngx-editor [editor]="editor" [(ngModel)]="content" [placeholder]="'Duyuru metni...'"></ngx-editor>
+          <div class="flex-1 flex flex-col border rounded-lg overflow-hidden transition-colors duration-300"
+               [ngClass]="(format === 'Cinematic' || format === 'Story') ? 'bg-gray-900 text-gray-100 border-gray-700' : 'bg-white text-gray-900 border-gray-200'">
+             <quill-editor [modules]="quillConfig" [(ngModel)]="content" placeholder="Duyuru metni..." class="flex-1 flex flex-col"></quill-editor>
           </div>
         </div>
 
@@ -165,42 +227,25 @@ import { Editor, Toolbar, NgxEditorModule } from 'ngx-editor';
       display: block;
       height: 100%;
     }
-    ::ng-deep .NgxEditor__Wrapper {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      border-radius: 8px;
+    :host ::ng-deep .ql-toolbar {
+      background-color: #f8fafc !important; /* Toolbar her zaman açık renk kalsın */
+      border-color: #e2e8f0 !important;
     }
-    ::ng-deep .NgxEditor {
+    :host ::ng-deep .ql-container {
       flex: 1;
-      overflow-y: auto;
-      padding: 12px;
+      font-size: 15px;
       font-family: 'Inter', sans-serif;
-      font-size: 14px;
-      border: none !important;
+      border-color: transparent !important; /* Dıştaki div'in kenarlığını kullanıyoruz */
     }
-    ::ng-deep .NgxEditor__MenuBar {
-      border: none !important;
-      border-bottom: 1px solid #e5e7eb !important;
-      background: #f9fafb !important;
+    :host ::ng-deep .ql-editor {
+      min-height: 250px;
     }
-    ::ng-deep .NgxEditor__MenuItem {
-      color: #374151 !important;
-    }
-    /* Editör ve önizlemede medya serbest akışı ve boyutlandırma */
-    ::ng-deep .NgxEditor img,
-    ::ng-deep .NgxEditor video {
+    :host ::ng-deep .ql-editor img,
+    :host ::ng-deep .ql-editor video {
       display: inline-block;
       margin: 4px;
       max-width: 100%;
       border-radius: 8px;
-      resize: both;
-      overflow: hidden;
-      box-sizing: border-box;
-      outline: none;
-    }
-    ::ng-deep .NgxEditor img:active {
-      border: 1px dashed #ccc;
     }
   `]
 })
@@ -215,31 +260,30 @@ export class AnnouncementFormComponent implements OnInit, OnDestroy {
   onceDurationMinutes: number | null = null;
   layoutWidth: string = 'Standart';
 
+  titleFontFamily = 'Inter';
+  titleFontSize = '1.5rem';
+  titleIsBold = true;
+  titleColor = '#1f2937';
+  repeatInterval = 'None';
+
   editId: number | null = null;
   isUploading = false;
   currentUploadType: 'image' | 'video' = 'image';
 
-  editor!: Editor;
-  toolbar: Toolbar = [
-    ['bold', 'italic', 'underline', 'strike'],
-    ['code', 'blockquote'],
-    ['ordered_list', 'bullet_list'],
-    [{ heading: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] }],
-    ['link', 'image'],
-    ['text_color', 'background_color'],
-    ['align_left', 'align_center', 'align_right', 'align_justify'],
-  ];
-
-  customColors = [
-    '#000000', '#333333', '#666666', '#999999', '#CCCCCC', '#FFFFFF',
-    '#FF0000', '#FF9900', '#FFFF00', '#00FF00', '#00FFFF', '#0000FF', '#9900FF', '#FF00FF',
-    '#F4CCCC', '#FCE5CD', '#FFF2CC', '#D9EAD3', '#D0E0E3', '#CFE2F3', '#D9D2E9', '#EAD1DC',
-    '#EA9999', '#F9CB9C', '#FFE599', '#B6D7A8', '#A2C4C9', '#9FC5E8', '#B4A7D6', '#D5A6BD',
-    '#E06666', '#F6B26B', '#FFD966', '#93C47D', '#76A5AF', '#6FA8DC', '#8E7CC3', '#C27BA0',
-    '#CC0000', '#E69138', '#F1C232', '#6AA84F', '#45818E', '#3D85C6', '#674EA7', '#A64D79',
-    '#990000', '#B45F06', '#BF9000', '#38761D', '#134F5C', '#0B5394', '#351C75', '#741B47',
-    '#660000', '#783F04', '#7F6000', '#274E13', '#0C343D', '#073763', '#20124D', '#4C1130'
-  ];
+  quillConfig = {
+    toolbar: [
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'font': [] }, { 'size': ['small', false, 'large', 'huge'] }],
+      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+      [{ 'color': [] }, { 'background': [] }],
+      [{ 'align': [] }, { 'list': 'ordered' }, { 'list': 'bullet' }],
+      ['link', 'image', 'video'],
+      ['clean']
+    ],
+    resize: {
+      locale: {}
+    }
+  };
 
   private announcementService = inject(AnnouncementService);
   private authService = inject(AuthService);
@@ -257,11 +301,11 @@ export class AnnouncementFormComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.editor = new Editor();
+    //
   }
 
   ngOnDestroy(): void {
-    this.editor.destroy();
+    //
   }
 
   /** Sıklık değişince Once dışındaysa süreyi sıfırla */
@@ -297,6 +341,11 @@ export class AnnouncementFormComponent implements OnInit, OnDestroy {
     this.endDate = null;
     this.onceDurationMinutes = null;
     this.layoutWidth = 'Standart';
+    this.titleFontFamily = 'Inter';
+    this.titleFontSize = '1.5rem';
+    this.titleIsBold = true;
+    this.titleColor = '#1f2937';
+    this.repeatInterval = 'None';
   }
 
   getSubmitButtonText(): string {
@@ -311,7 +360,11 @@ export class AnnouncementFormComponent implements OnInit, OnDestroy {
         title: this.title,
         content: this.content,
         format: this.format,
-        layoutWidth: this.layoutWidth
+        layoutWidth: this.layoutWidth,
+        titleFontFamily: this.titleFontFamily,
+        titleFontSize: this.titleFontSize,
+        titleIsBold: this.titleIsBold,
+        titleColor: this.titleColor
       } as any);
     }
   }
@@ -333,6 +386,11 @@ export class AnnouncementFormComponent implements OnInit, OnDestroy {
     this.endDate = toLocalDatetime(ann.endDate || ann.EndDate);
     this.onceDurationMinutes = ann.onceDurationMinutes ?? ann.OnceDurationMinutes ?? null;
     this.layoutWidth = ann.layoutWidth || ann.LayoutWidth || 'Standart';
+    this.titleFontFamily = ann.titleFontFamily || ann.TitleFontFamily || 'Inter';
+    this.titleFontSize = ann.titleFontSize || ann.TitleFontSize || '1.5rem';
+    this.titleIsBold = ann.titleIsBold ?? ann.TitleIsBold ?? true;
+    this.titleColor = ann.titleColor || ann.TitleColor || '#1f2937';
+    this.repeatInterval = ann.repeatInterval || ann.RepeatInterval || 'None';
   }
 
   triggerFileInput(fileInput: HTMLInputElement, type: 'image' | 'video') {
@@ -353,7 +411,8 @@ export class AnnouncementFormComponent implements OnInit, OnDestroy {
       if (this.currentUploadType === 'image') {
         this.content += `<br><img src="${url}" style="max-width:100%; border-radius: 8px;"><br>`;
       } else {
-        this.content += `<br><video controls style="max-width:100%; border-radius: 8px;"><source src="${url}" type="${file.type}"></video><br>`;
+        // Quill custom blot ile eşleşebilmesi için video tag'ını veriyoruz.
+        this.content += `<br><video src="${url}"></video><br>`;
       }
     } else {
       this.alertService.error("Dosya yüklenemedi!");
@@ -375,7 +434,12 @@ export class AnnouncementFormComponent implements OnInit, OnDestroy {
       onceDurationMinutes: (this.frequency === 'Once' && this.canSetDuration() && this.onceDurationMinutes)
         ? Number(this.onceDurationMinutes)
         : null,
-      layoutWidth: this.layoutWidth
+      layoutWidth: this.layoutWidth,
+      titleFontFamily: this.titleFontFamily,
+      titleFontSize: this.titleFontSize,
+      titleIsBold: this.titleIsBold,
+      titleColor: this.titleColor,
+      repeatInterval: this.repeatInterval
     };
 
     if (this.editId) {

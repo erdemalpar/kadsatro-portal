@@ -57,7 +57,7 @@ const POLLING_MS  = 30_000;
                   class="inline-block px-3 py-1 text-xs font-bold rounded-full mb-6">
               {{ current()?.format }}
             </span>
-            <h1 [ngClass]="h1Class()" class="font-extrabold mb-8">{{ current()?.title }}</h1>
+            <h1 [ngClass]="h1Class()" [ngStyle]="getTitleStyles()" class="font-extrabold mb-8">{{ current()?.title }}</h1>
             <div [ngClass]="proseClass()"
                  class="prose max-w-none w-full break-words overflow-x-auto"
                  [innerHTML]="safeContent()"></div>
@@ -112,6 +112,23 @@ const POLLING_MS  = 30_000;
     </div>
   `,
   styles: [`
+    /* Quill ve genel HTML editör çıktılarını korumak için */
+    :host ::ng-deep .prose .ql-align-center { text-align: center; }
+    :host ::ng-deep .prose .ql-align-right { text-align: right; }
+    :host ::ng-deep .prose .ql-align-justify { text-align: justify; }
+
+    /* Enter (yeni satır boşluğu) sorununu çözmek için */
+    :host ::ng-deep .prose p:empty::before,
+    :host ::ng-deep .prose p:has(br:only-child)::before {
+      content: "\\00a0"; /* Non-breaking space ile satır yüksekliğini sağla */
+      display: inline-block;
+    }
+    :host ::ng-deep .prose p {
+      min-height: 1.5em; 
+      margin-top: 0 !important;
+      margin-bottom: 0.75em !important;
+    }
+
     :host ::ng-deep .prose img,
     :host ::ng-deep .prose video {
       display: inline-block !important;
@@ -303,15 +320,26 @@ export class AnnouncementPopupComponent implements OnInit, OnDestroy {
   }
 
   h1Class(): string {
-    if (this.fmt === 'Cinematic') return 'text-5xl lg:text-7xl !text-white tracking-tighter drop-shadow-2xl';
-    if (this.fmt === 'Story')     return 'text-3xl !text-white drop-shadow-lg leading-tight mt-auto';
-    return 'text-3xl lg:text-4xl !text-gray-900';
+    if (this.fmt === 'Cinematic') return 'drop-shadow-2xl';
+    if (this.fmt === 'Story')     return 'drop-shadow-lg leading-tight mt-auto';
+    return '';
+  }
+
+  getTitleStyles(): any {
+    const ann = this.current();
+    if (!ann) return {};
+    return {
+      'font-family': ann.titleFontFamily || ann.TitleFontFamily || 'inherit',
+      'font-size': ann.titleFontSize || ann.TitleFontSize || 'inherit',
+      'font-weight': (ann.titleIsBold ?? ann.TitleIsBold ?? true) ? 'bold' : 'normal',
+      'color': ann.titleColor || ann.TitleColor || 'inherit'
+    };
   }
 
   proseClass(): string {
-    if (this.fmt === 'Cinematic') return 'prose-invert prose-xl text-left [&_*]:!text-gray-100 [&_h1]:!text-white [&_h2]:!text-white [&_h3]:!text-white [&_h4]:!text-white [&_a]:!text-blue-400';
-    if (this.fmt === 'Story')     return 'prose-invert prose-p:!text-white/90 prose-headings:!text-white';
-    return 'prose-indigo prose-img:rounded-xl prose-img:shadow-md prose-p:!text-gray-800 prose-headings:!text-gray-900';
+    if (this.fmt === 'Cinematic') return 'prose-invert prose-xl text-left';
+    if (this.fmt === 'Story')     return 'prose-invert';
+    return 'prose-indigo prose-img:rounded-xl prose-img:shadow-md';
   }
 
   footerClass(): string {

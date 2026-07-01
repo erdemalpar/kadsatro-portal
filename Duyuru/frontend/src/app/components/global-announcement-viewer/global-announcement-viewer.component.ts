@@ -75,7 +75,8 @@ import { DomSanitizer } from '@angular/platform-browser';
 
               <!-- Başlık -->
               <h1 class="font-extrabold mb-8"
-                  [ngClass]="getHeadingClass()">
+                  [ngClass]="getHeadingClass()"
+                  [ngStyle]="getTitleStyles()">
                 {{ currentAnnouncement()?.title }}
               </h1>
               
@@ -138,6 +139,23 @@ import { DomSanitizer } from '@angular/platform-browser';
     </div>
   `,
   styles: [`
+    /* Quill ve genel HTML editör çıktılarını korumak için */
+    :host ::ng-deep .prose .ql-align-center { text-align: center; }
+    :host ::ng-deep .prose .ql-align-right { text-align: right; }
+    :host ::ng-deep .prose .ql-align-justify { text-align: justify; }
+    
+    /* Enter (yeni satır boşluğu) sorununu çözmek için */
+    :host ::ng-deep .prose p:empty::before,
+    :host ::ng-deep .prose p:has(br:only-child)::before {
+      content: "\\00a0"; /* Non-breaking space ile satır yüksekliğini sağla */
+      display: inline-block;
+    }
+    :host ::ng-deep .prose p {
+      min-height: 1.5em; 
+      margin-top: 0 !important;
+      margin-bottom: 0.75em !important;
+    }
+
     :host ::ng-deep .prose img,
     :host ::ng-deep .prose video {
       display: inline-block !important;
@@ -359,16 +377,27 @@ export class GlobalAnnouncementViewerComponent implements OnInit, OnDestroy {
 
   getHeadingClass(): string {
     const format = this.currentAnnouncement()?.format;
-    if (format === 'Cinematic') return 'text-5xl lg:text-7xl !text-white tracking-tighter drop-shadow-2xl';
-    if (format === 'Story') return 'text-3xl !text-white drop-shadow-lg leading-tight mt-auto';
-    return 'text-3xl lg:text-4xl !text-gray-900';
+    if (format === 'Cinematic') return 'drop-shadow-2xl';
+    if (format === 'Story') return 'drop-shadow-lg leading-tight mt-auto';
+    return '';
+  }
+
+  getTitleStyles(): any {
+    const ann = this.currentAnnouncement();
+    if (!ann) return {};
+    return {
+      'font-family': ann.titleFontFamily || ann.TitleFontFamily || 'inherit',
+      'font-size': ann.titleFontSize || ann.TitleFontSize || 'inherit',
+      'font-weight': (ann.titleIsBold ?? ann.TitleIsBold ?? true) ? 'bold' : 'normal',
+      'color': ann.titleColor || ann.TitleColor || 'inherit'
+    };
   }
 
   getProseClass(): string {
     const format = this.currentAnnouncement()?.format;
-    if (format === 'Cinematic') return 'prose-invert prose-xl text-left prose-img:rounded-3xl prose-img:shadow-[0_20px_50px_rgba(0,0,0,0.5)] prose-img:m-1 [&_*]:!text-gray-100 [&_h1]:!text-white [&_h2]:!text-white [&_h3]:!text-white [&_h4]:!text-white [&_a]:!text-blue-400 [&_video]:!rounded-3xl [&_video]:!shadow-[0_20px_50px_rgba(0,0,0,0.5)] [&_video]:!m-1';
-    if (format === 'Story') return 'prose-invert prose-p:!text-white/90 prose-headings:!text-white prose-img:rounded-xl prose-a:!text-white';
-    return 'prose-indigo prose-img:rounded-xl prose-img:shadow-md prose-p:!text-gray-800 prose-headings:!text-gray-900';
+    if (format === 'Cinematic') return 'prose-invert prose-xl text-left prose-img:rounded-3xl prose-img:shadow-[0_20px_50px_rgba(0,0,0,0.5)] prose-img:m-1 [&_video]:!rounded-3xl [&_video]:!shadow-[0_20px_50px_rgba(0,0,0,0.5)] [&_video]:!m-1';
+    if (format === 'Story') return 'prose-invert prose-img:rounded-xl';
+    return 'prose-indigo prose-img:rounded-xl prose-img:shadow-md';
   }
 
 }

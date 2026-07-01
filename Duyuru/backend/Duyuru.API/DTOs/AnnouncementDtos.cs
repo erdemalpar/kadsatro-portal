@@ -12,7 +12,12 @@ namespace Duyuru.API.DTOs
         DateTime? EndDate,
         string Frequency,
         int? OnceDurationMinutes,
-        string? LayoutWidth
+        string? LayoutWidth,
+        string? TitleFontFamily,
+        string? TitleFontSize,
+        bool TitleIsBold,
+        string? TitleColor,
+        string RepeatInterval
     );
 
     public record UpdateAnnouncementStatusDto(
@@ -29,7 +34,12 @@ namespace Duyuru.API.DTOs
         DateTime? EndDate,
         string Frequency,
         int? OnceDurationMinutes,
-        string? LayoutWidth
+        string? LayoutWidth,
+        string? TitleFontFamily,
+        string? TitleFontSize,
+        bool TitleIsBold,
+        string? TitleColor,
+        string RepeatInterval
     );
 
     public record DashboardStatsDto(
@@ -61,6 +71,11 @@ namespace Duyuru.API.DTOs
         DateTime? EndDate,
         string Frequency,
         int? OnceDurationMinutes,
-        string? LayoutWidth
+        string? LayoutWidth,
+        string? TitleFontFamily,
+        string? TitleFontSize,
+        bool TitleIsBold,
+        string? TitleColor,
+        string RepeatInterval
     );
 }

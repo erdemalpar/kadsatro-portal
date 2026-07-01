@@ -63,6 +63,11 @@ namespace Duyuru.API.Services
                 EndDate = dto.EndDate,
                 Frequency = Enum.TryParse<DisplayFrequency>(dto.Frequency, true, out var parsedFreq) ? parsedFreq : DisplayFrequency.Once,
                 OnceDurationMinutes = dto.OnceDurationMinutes,
+                TitleFontFamily = dto.TitleFontFamily,
+                TitleFontSize = dto.TitleFontSize,
+                TitleIsBold = dto.TitleIsBold,
+                TitleColor = dto.TitleColor,
+                RepeatInterval = dto.RepeatInterval ?? "None",
                 CreatedAt = DateTime.UtcNow,
                 PublishedAt = initialStatus == AnnouncementStatus.Published ? DateTime.UtcNow : null
             };
@@ -160,6 +165,11 @@ namespace Duyuru.API.Services
             announcement.Content = dto.Content;
             announcement.Format = dto.Format;
             announcement.LayoutWidth = dto.LayoutWidth ?? "Standart";
+            announcement.TitleFontFamily = dto.TitleFontFamily;
+            announcement.TitleFontSize = dto.TitleFontSize;
+            announcement.TitleIsBold = dto.TitleIsBold;
+            announcement.TitleColor = dto.TitleColor;
+            announcement.RepeatInterval = dto.RepeatInterval ?? "None";
             announcement.CategoryId = dto.CategoryId;
             announcement.StartDate = dto.StartDate;
             announcement.EndDate = dto.EndDate;
@@ -325,7 +335,13 @@ namespace Duyuru.API.Services
             
             // Tarih filtrelemesini Memory'de yap
             var activeAnnouncements = dbAnnouncements
-                .Where(a => (a.StartDate == null || a.StartDate <= now) && (a.EndDate == null || a.EndDate >= now))
+                .Where(a => {
+                    if (a.RepeatInterval == "Yearly" && a.StartDate.HasValue)
+                    {
+                        return a.StartDate.Value.Month == now.Month && a.StartDate.Value.Day == now.Day;
+                    }
+                    return (a.StartDate == null || a.StartDate <= now) && (a.EndDate == null || a.EndDate >= now);
+                })
                 .ToList();
 
             // Kullanıcının okuduğu duyuruların listesini al
@@ -339,7 +355,14 @@ namespace Duyuru.API.Services
             {
                 var log = userLogs.FirstOrDefault(l => l.AnnouncementId == ann.Id);
 
-                if (ann.Frequency == DisplayFrequency.Always)
+                if (ann.RepeatInterval == "Yearly")
+                {
+                    if (log == null || log.Version < ann.Version || log.ReadAt.Year < now.Year)
+                    {
+                        unread.Add(ann);
+                    }
+                }
+                else if (ann.Frequency == DisplayFrequency.Always)
                 {
                     unread.Add(ann);
                 }
@@ -444,7 +467,12 @@ namespace Duyuru.API.Services
                 EndDate: a.EndDate,
                 Frequency: a.Frequency.ToString(),
                 OnceDurationMinutes: a.OnceDurationMinutes,
-                LayoutWidth: a.LayoutWidth
+                LayoutWidth: a.LayoutWidth,
+                TitleFontFamily: a.TitleFontFamily,
+                TitleFontSize: a.TitleFontSize,
+                TitleIsBold: a.TitleIsBold,
+                TitleColor: a.TitleColor,
+                RepeatInterval: a.RepeatInterval
             );
         }
     }

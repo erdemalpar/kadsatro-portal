@@ -59,6 +59,10 @@ namespace Duyuru.API.Migrations
                     b.Property<string>("RejectionReason")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("RepeatInterval")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime?>("StartDate")
                         .HasColumnType("TEXT");
 
@@ -68,6 +72,18 @@ namespace Duyuru.API.Migrations
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<string>("TitleColor")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TitleFontFamily")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TitleFontSize")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("TitleIsBold")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Version")
                         .HasColumnType("INTEGER");
