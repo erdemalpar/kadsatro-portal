@@ -46,7 +46,7 @@ import { Subscription } from 'rxjs';
               <th class="py-3 px-5 text-[11px] font-bold text-gray-400 uppercase tracking-widest w-28">Tarih</th>
               <th class="py-3 px-5 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Duyuru</th>
               <th class="py-3 px-5 text-[11px] font-bold text-gray-400 uppercase tracking-widest w-36 text-center">Statü</th>
-              <th class="py-3 px-5 text-[11px] font-bold text-gray-400 uppercase tracking-widest text-right w-44">İşlem</th>
+              <th class="py-3 px-5 text-[11px] font-bold text-gray-400 uppercase tracking-widest text-right">İşlem</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
@@ -126,13 +126,13 @@ import { Subscription } from 'rxjs';
                   {{ getStatusText(item.status) }}
                 </span>
               </td>
-
+              
               <!-- Aksiyon Butonları -->
               <td class="py-4 px-5 align-middle">
                 <div class="flex flex-col gap-2 items-end">
                   
                   <!-- Üst Satır Butonları -->
-                  <div class="flex flex-wrap gap-1.5 justify-end items-center">
+                  <div class="flex flex-nowrap gap-1.5 justify-end items-center">
                     <button (click)="preview(item)" title="Önizle"
                       class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold rounded-md border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
@@ -165,9 +165,9 @@ import { Subscription } from 'rxjs';
                       </button>
                     </ng-container>
                   </div>
-
+  
                   <!-- Alt Satır Butonları (Geri Çek, Kimler Okudu) -->
-                  <div *ngIf="canWithdraw(item) || canViewReaders(item)" class="flex flex-wrap gap-1.5 justify-end items-center">
+                  <div *ngIf="canWithdraw(item) || canViewReaders(item)" class="flex flex-nowrap gap-1.5 justify-end items-center">
                     <button *ngIf="canWithdraw(item)" (click)="withdraw(item)" title="Geri Çek"
                       class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold rounded-md border border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100 transition-all">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
@@ -184,7 +184,7 @@ import { Subscription } from 'rxjs';
                 </div>
               </td>
             </tr>
-          </tbody>
+           </tbody>
         </table>
       </div>
 
