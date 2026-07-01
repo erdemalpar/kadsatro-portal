@@ -40,13 +40,13 @@ import { Subscription } from 'rxjs';
 
       <!-- Scrollable Tablo Container -->
       <div class="flex-1 overflow-x-auto overflow-y-auto">
-        <table class="w-full text-left border-collapse" style="min-width:960px">
+        <table class="w-full text-left border-collapse" style="min-width:800px">
           <thead>
             <tr class="bg-gray-50 border-b border-gray-200">
               <th class="py-3 px-5 text-[11px] font-bold text-gray-400 uppercase tracking-widest w-28">Tarih</th>
               <th class="py-3 px-5 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Duyuru</th>
               <th class="py-3 px-5 text-[11px] font-bold text-gray-400 uppercase tracking-widest w-36 text-center">Statü</th>
-              <th class="py-3 px-5 text-[11px] font-bold text-gray-400 uppercase tracking-widest text-right" style="white-space:nowrap">İşlem</th>
+              <th class="py-3 px-5 text-[11px] font-bold text-gray-400 uppercase tracking-widest text-right w-44">İşlem</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
@@ -128,52 +128,59 @@ import { Subscription } from 'rxjs';
               </td>
 
               <!-- Aksiyon Butonları -->
-              <td class="py-4 px-5 align-middle" style="white-space:nowrap">
-                <div class="flex flex-nowrap gap-1.5 justify-end items-center">
-
-                  <button (click)="preview(item)" title="Önizle"
-                    class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold rounded-md border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                    Önizle
-                  </button>
-
-                  <ng-container *ngIf="canEditOrDelete(item)">
-                    <button (click)="edit(item)" title="Düzenle"
-                      class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold rounded-md border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 transition-all">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                      Düzenle
+              <td class="py-4 px-5 align-middle">
+                <div class="flex flex-col gap-2 items-end">
+                  
+                  <!-- Üst Satır Butonları -->
+                  <div class="flex flex-wrap gap-1.5 justify-end items-center">
+                    <button (click)="preview(item)" title="Önizle"
+                      class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold rounded-md border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                      Önizle
                     </button>
-                    <button (click)="deleteItem(item)" title="Sil"
-                      class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold rounded-md border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 transition-all">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                      Sil
-                    </button>
-                  </ng-container>
+  
+                    <ng-container *ngIf="canEditOrDelete(item)">
+                      <button (click)="edit(item)" title="Düzenle"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold rounded-md border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                        Düzenle
+                      </button>
+                      <button (click)="deleteItem(item)" title="Sil"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold rounded-md border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        Sil
+                      </button>
+                    </ng-container>
+  
+                    <ng-container *ngIf="canApprove(item)">
+                      <button (click)="approve(item)" title="Onayla"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold rounded-md border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                        Onayla
+                      </button>
+                      <button (click)="reject(item)" title="Reddet"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold rounded-md border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                        Reddet
+                      </button>
+                    </ng-container>
+                  </div>
 
-                  <button *ngIf="canWithdraw(item)" (click)="withdraw(item)" title="Geri Çek"
-                    class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold rounded-md border border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100 transition-all">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
-                    Geri Çek
-                  </button>
-
-                  <button *ngIf="canViewReaders(item)" (click)="openReadersModal(item)" title="Kimler Okudu?"
-                    class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold rounded-md border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-all">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                    Kimler Okudu?
-                  </button>
-
-                  <ng-container *ngIf="canApprove(item)">
-                    <button (click)="approve(item)" title="Onayla"
-                      class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold rounded-md border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 transition-all">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
-                      Onayla
+                  <!-- Alt Satır Butonları (Geri Çek, Kimler Okudu) -->
+                  <div *ngIf="canWithdraw(item) || canViewReaders(item)" class="flex flex-wrap gap-1.5 justify-end items-center">
+                    <button *ngIf="canWithdraw(item)" (click)="withdraw(item)" title="Geri Çek"
+                      class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold rounded-md border border-orange-200 bg-orange-50 text-orange-700 hover:bg-orange-100 transition-all">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
+                      Geri Çek
                     </button>
-                    <button (click)="reject(item)" title="Reddet"
-                      class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold rounded-md border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 transition-all">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                      Reddet
+  
+                    <button *ngIf="canViewReaders(item)" (click)="openReadersModal(item)" title="Kimler Okudu?"
+                      class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold rounded-md border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-all">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                      Kimler Okudu?
                     </button>
-                  </ng-container>
+                  </div>
+                  
                 </div>
               </td>
             </tr>
