@@ -40,14 +40,14 @@ import { Subscription } from 'rxjs';
 
       <!-- Scrollable Tablo Container (Mobil Uyumluluk İçin) -->
       <div class="flex-1 overflow-x-auto overflow-y-auto">
-        <table class="w-full min-w-[800px] text-left border-collapse">
+        <table class="w-full min-w-[900px] text-left border-collapse">
           <thead>
             <tr class="bg-gray-50/50">
               <th class="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider w-32 border-b border-gray-100">Tarih</th>
               <th class="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100">Konu Başlığı & Statü Notları</th>
               <th class="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider w-32 border-b border-gray-100 text-center">Kategori</th>
               <th class="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider w-48 border-b border-gray-100">Statü</th>
-              <th class="py-4 px-6 text-xs font-bold text-gray-500 uppercase tracking-wider w-40 border-b border-gray-100 text-right">İşlem</th>
+              <th class="py-4 px-3 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100 text-right" style="white-space:nowrap;">İşlem</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
@@ -138,8 +138,8 @@ import { Subscription } from 'rxjs';
               </td>
 
               <!-- Aksiyon İşlem Butonları -->
-              <td class="py-4 px-6 align-middle text-right">
-                <div class="flex flex-wrap gap-2 justify-end items-center">
+              <td class="py-4 px-3 align-middle text-right" style="white-space:nowrap;">
+                <div class="flex flex-nowrap gap-1.5 justify-end items-center">
                   <button (click)="preview(item)" class="py-1 px-3 text-[11px] font-bold border border-gray-200 text-gray-600 rounded-md hover:bg-gray-50 transition-colors">
                     Önizle
                   </button>
