@@ -18,6 +18,12 @@ export interface AnnouncementResponseDto {
     endDate?: string | null;
     frequency: DisplayFrequency;
     onceDurationMinutes?: number | null;
+    layoutWidth?: string;
+    titleFontFamily?: string;
+    titleFontSize?: string;
+    titleIsBold?: boolean;
+    titleColor?: string;
+    repeatInterval?: string;
 }
 
 export interface CreateAnnouncementDto {
@@ -30,6 +36,12 @@ export interface CreateAnnouncementDto {
     endDate?: string | null;
     frequency: DisplayFrequency;
     onceDurationMinutes?: number | null;
+    layoutWidth?: string;
+    titleFontFamily?: string;
+    titleFontSize?: string;
+    titleIsBold?: boolean;
+    titleColor?: string;
+    repeatInterval?: string;
 }
 
 export interface UpdateAnnouncementStatusDto {
@@ -46,6 +58,12 @@ export interface UpdateAnnouncementDto {
   endDate?: string | null;
   frequency: DisplayFrequency;
   onceDurationMinutes?: number | null;
+  layoutWidth?: string;
+  titleFontFamily?: string;
+  titleFontSize?: string;
+  titleIsBold?: boolean;
+  titleColor?: string;
+  repeatInterval?: string;
 }
 
 export interface DashboardStatsDto {

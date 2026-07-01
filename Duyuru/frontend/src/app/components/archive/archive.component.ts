@@ -315,7 +315,8 @@ export class ArchiveComponent implements OnInit, OnDestroy {
       const now = new Date().getTime();
       list = list.filter(a => {
         const end = a.endDate ? new Date(a.endDate).getTime() : null;
-        const isExpired = end !== null && end < now;
+        // Süresi dolmuş = EndDate geçmiş VEYA statüsü Withdrawn olan
+        const isExpired = a.status === 'Withdrawn' || (end !== null && end < now);
         if (this.filterStatus === 'active') return !isExpired;
         if (this.filterStatus === 'expired') return isExpired;
         return true;

@@ -144,6 +144,37 @@ import { DomSanitizer } from '@angular/platform-browser';
     :host ::ng-deep .prose .ql-align-right { text-align: right; }
     :host ::ng-deep .prose .ql-align-justify { text-align: justify; }
     
+    :host ::ng-deep .prose .ql-size-small { font-size: 0.75em; }
+    :host ::ng-deep .prose .ql-size-large { font-size: 1.5em; }
+    :host ::ng-deep .prose .ql-size-huge { font-size: 2.5em; }
+    
+    :host ::ng-deep .prose .ql-font-arial { font-family: 'Arial', sans-serif; }
+    :host ::ng-deep .prose .ql-font-verdana { font-family: 'Verdana', sans-serif; }
+    :host ::ng-deep .prose .ql-font-tahoma { font-family: 'Tahoma', sans-serif; }
+    :host ::ng-deep .prose .ql-font-trebuchet-ms { font-family: 'Trebuchet MS', sans-serif; }
+    :host ::ng-deep .prose .ql-font-segoe-ui { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    :host ::ng-deep .prose .ql-font-century-gothic { font-family: 'Century Gothic', sans-serif; }
+    :host ::ng-deep .prose .ql-font-franklin-gothic { font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif; }
+
+    :host ::ng-deep .prose .ql-font-cambria { font-family: 'Cambria', Cochin, Georgia, Times, 'Times New Roman', serif; }
+    :host ::ng-deep .prose .ql-font-garamond { font-family: 'Garamond', serif; }
+    :host ::ng-deep .prose .ql-font-georgia { font-family: 'Georgia', serif; }
+    :host ::ng-deep .prose .ql-font-book-antiqua { font-family: 'Book Antiqua', serif; }
+    :host ::ng-deep .prose .ql-font-palatino-linotype { font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif; }
+    :host ::ng-deep .prose .ql-font-baskerville-old-face { font-family: 'Baskerville Old Face', serif; }
+
+    :host ::ng-deep .prose .ql-font-courier-new { font-family: 'Courier New', Courier, monospace; }
+    :host ::ng-deep .prose .ql-font-consolas { font-family: 'Consolas', monospace; }
+    :host ::ng-deep .prose .ql-font-lucida-console { font-family: 'Lucida Console', Monaco, monospace; }
+
+    :host ::ng-deep .prose .ql-font-comic-sans-ms { font-family: 'Comic Sans MS', cursive, sans-serif; }
+    :host ::ng-deep .prose .ql-font-impact { font-family: 'Impact', Charcoal, sans-serif; }
+    :host ::ng-deep .prose .ql-font-brush-script-mt { font-family: 'Brush Script MT', cursive; }
+    :host ::ng-deep .prose .ql-font-papyrus { font-family: 'Papyrus', fantasy; }
+    :host ::ng-deep .prose .ql-font-jokerman { font-family: 'Jokerman', fantasy; }
+    :host ::ng-deep .prose .ql-font-edwardian-script-itc { font-family: 'Edwardian Script ITC', cursive; }
+
+    
     /* Enter (yeni satır boşluğu) sorununu çözmek için */
     :host ::ng-deep .prose p:empty::before,
     :host ::ng-deep .prose p:has(br:only-child)::before {

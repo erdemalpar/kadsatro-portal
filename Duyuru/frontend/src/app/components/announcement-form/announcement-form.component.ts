@@ -24,6 +24,32 @@ class CustomVideoBlot extends BlockEmbed {
   static value(node: any) {
     return node.getAttribute('src');
   }
+
+  static formats(node: any) {
+    let format: any = {};
+    if (node.hasAttribute('style')) {
+      format.style = node.getAttribute('style');
+    }
+    if (node.hasAttribute('width')) {
+      format.width = node.getAttribute('width');
+    }
+    if (node.hasAttribute('height')) {
+      format.height = node.getAttribute('height');
+    }
+    return format;
+  }
+
+  format(name: string, value: any) {
+    if (name === 'style' || name === 'width' || name === 'height') {
+      if (value) {
+        (this as any).domNode.setAttribute(name, value);
+      } else {
+        (this as any).domNode.removeAttribute(name);
+      }
+    } else {
+      super.format(name, value);
+    }
+  }
 }
 (CustomVideoBlot as any)['blotName'] = 'nativeVideo';
 (CustomVideoBlot as any)['tagName'] = 'video';
@@ -41,6 +67,16 @@ class NativeVideoSpec extends UnclickableBlotSpec {
 
 Quill.register('modules/blotFormatter', BlotFormatter);
 
+const Font = Quill.import('formats/font');
+Font.whitelist = [
+  'arial', 'verdana', 'tahoma', 'trebuchet-ms', 'segoe-ui', 'century-gothic', 'franklin-gothic',
+  'cambria', 'garamond', 'georgia', 'book-antiqua', 'palatino-linotype', 'baskerville-old-face',
+  'courier-new', 'consolas', 'lucida-console',
+  'comic-sans-ms', 'impact', 'brush-script-mt', 'papyrus', 'jokerman', 'edwardian-script-itc'
+];
+Quill.register(Font, true);
+
+
 @Component({
   selector: 'app-announcement-form',
   standalone: true,
@@ -55,11 +91,36 @@ Quill.register('modules/blotFormatter', BlotFormatter);
           <div class="flex gap-2 mb-2 p-2 bg-gray-50 border border-gray-100 rounded-lg">
             <select [(ngModel)]="titleFontFamily" class="border border-gray-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-400">
               <option value="Inter">Varsayılan (Inter)</option>
-              <option value="'Times New Roman', Times, serif">Times New Roman</option>
-              <option value="Arial, Helvetica, sans-serif">Arial</option>
-              <option value="Verdana, Geneva, sans-serif">Verdana</option>
-              <option value="Tahoma, Geneva, sans-serif">Tahoma</option>
-              <option value="'Courier New', Courier, monospace">Courier New</option>
+              <optgroup label="Tırnaksız (Sans-Serif)">
+                <option value="Arial, Helvetica, sans-serif">Arial</option>
+                <option value="Verdana, Geneva, sans-serif">Verdana</option>
+                <option value="Tahoma, Geneva, sans-serif">Tahoma</option>
+                <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                <option value="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Segoe UI</option>
+                <option value="'Century Gothic', sans-serif">Century Gothic</option>
+                <option value="'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif">Franklin Gothic Medium</option>
+              </optgroup>
+              <optgroup label="Tırnaklı (Serif)">
+                <option value="Cambria, Cochin, Georgia, Times, 'Times New Roman', serif">Cambria</option>
+                <option value="Garamond, serif">Garamond</option>
+                <option value="Georgia, serif">Georgia</option>
+                <option value="'Book Antiqua', serif">Book Antiqua</option>
+                <option value="'Palatino Linotype', 'Book Antiqua', Palatino, serif">Palatino Linotype</option>
+                <option value="'Baskerville Old Face', serif">Baskerville Old Face</option>
+              </optgroup>
+              <optgroup label="Eşit Aralıklı (Monospace)">
+                <option value="'Courier New', Courier, monospace">Courier New</option>
+                <option value="Consolas, monospace">Consolas</option>
+                <option value="'Lucida Console', Monaco, monospace">Lucida Console</option>
+              </optgroup>
+              <optgroup label="Dekoratif (Script/Display)">
+                <option value="'Comic Sans MS', cursive, sans-serif">Comic Sans MS</option>
+                <option value="Impact, Charcoal, sans-serif">Impact</option>
+                <option value="'Brush Script MT', cursive">Brush Script MT</option>
+                <option value="Papyrus, fantasy">Papyrus</option>
+                <option value="Jokerman, fantasy">Jokerman</option>
+                <option value="'Edwardian Script ITC', cursive">Edwardian Script ITC</option>
+              </optgroup>
             </select>
             <select [(ngModel)]="titleFontSize" class="border border-gray-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-400">
               <option value="1.5rem">Orta Boy</option>
@@ -258,6 +319,60 @@ Quill.register('modules/blotFormatter', BlotFormatter);
       max-width: 100%;
       border-radius: 8px;
     }
+
+    /* Quill Toolbars & Editor Fonts */
+    :host ::ng-deep .ql-font-arial { font-family: 'Arial', sans-serif; }
+    :host ::ng-deep .ql-font-verdana { font-family: 'Verdana', sans-serif; }
+    :host ::ng-deep .ql-font-tahoma { font-family: 'Tahoma', sans-serif; }
+    :host ::ng-deep .ql-font-trebuchet-ms { font-family: 'Trebuchet MS', sans-serif; }
+    :host ::ng-deep .ql-font-segoe-ui { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    :host ::ng-deep .ql-font-century-gothic { font-family: 'Century Gothic', sans-serif; }
+    :host ::ng-deep .ql-font-franklin-gothic { font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif; }
+
+    :host ::ng-deep .ql-font-cambria { font-family: 'Cambria', Cochin, Georgia, Times, 'Times New Roman', serif; }
+    :host ::ng-deep .ql-font-garamond { font-family: 'Garamond', serif; }
+    :host ::ng-deep .ql-font-georgia { font-family: 'Georgia', serif; }
+    :host ::ng-deep .ql-font-book-antiqua { font-family: 'Book Antiqua', serif; }
+    :host ::ng-deep .ql-font-palatino-linotype { font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif; }
+    :host ::ng-deep .ql-font-baskerville-old-face { font-family: 'Baskerville Old Face', serif; }
+
+    :host ::ng-deep .ql-font-courier-new { font-family: 'Courier New', Courier, monospace; }
+    :host ::ng-deep .ql-font-consolas { font-family: 'Consolas', monospace; }
+    :host ::ng-deep .ql-font-lucida-console { font-family: 'Lucida Console', Monaco, monospace; }
+
+    :host ::ng-deep .ql-font-comic-sans-ms { font-family: 'Comic Sans MS', cursive, sans-serif; }
+    :host ::ng-deep .ql-font-impact { font-family: 'Impact', Charcoal, sans-serif; }
+    :host ::ng-deep .ql-font-brush-script-mt { font-family: 'Brush Script MT', cursive; }
+    :host ::ng-deep .ql-font-papyrus { font-family: 'Papyrus', fantasy; }
+    :host ::ng-deep .ql-font-jokerman { font-family: 'Jokerman', fantasy; }
+    :host ::ng-deep .ql-font-edwardian-script-itc { font-family: 'Edwardian Script ITC', cursive; }
+
+    /* Dropdown İsimleri */
+    :host ::ng-deep .ql-picker.ql-font .ql-picker-label[data-value="arial"]::before, :host ::ng-deep .ql-picker.ql-font .ql-picker-item[data-value="arial"]::before { content: 'Arial'; font-family: 'Arial', sans-serif; }
+    :host ::ng-deep .ql-picker.ql-font .ql-picker-label[data-value="verdana"]::before, :host ::ng-deep .ql-picker.ql-font .ql-picker-item[data-value="verdana"]::before { content: 'Verdana'; font-family: 'Verdana', sans-serif; }
+    :host ::ng-deep .ql-picker.ql-font .ql-picker-label[data-value="tahoma"]::before, :host ::ng-deep .ql-picker.ql-font .ql-picker-item[data-value="tahoma"]::before { content: 'Tahoma'; font-family: 'Tahoma', sans-serif; }
+    :host ::ng-deep .ql-picker.ql-font .ql-picker-label[data-value="trebuchet-ms"]::before, :host ::ng-deep .ql-picker.ql-font .ql-picker-item[data-value="trebuchet-ms"]::before { content: 'Trebuchet MS'; font-family: 'Trebuchet MS', sans-serif; }
+    :host ::ng-deep .ql-picker.ql-font .ql-picker-label[data-value="segoe-ui"]::before, :host ::ng-deep .ql-picker.ql-font .ql-picker-item[data-value="segoe-ui"]::before { content: 'Segoe UI'; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    :host ::ng-deep .ql-picker.ql-font .ql-picker-label[data-value="century-gothic"]::before, :host ::ng-deep .ql-picker.ql-font .ql-picker-item[data-value="century-gothic"]::before { content: 'Century Gothic'; font-family: 'Century Gothic', sans-serif; }
+    :host ::ng-deep .ql-picker.ql-font .ql-picker-label[data-value="franklin-gothic"]::before, :host ::ng-deep .ql-picker.ql-font .ql-picker-item[data-value="franklin-gothic"]::before { content: 'Franklin Gothic'; font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif; }
+
+    :host ::ng-deep .ql-picker.ql-font .ql-picker-label[data-value="cambria"]::before, :host ::ng-deep .ql-picker.ql-font .ql-picker-item[data-value="cambria"]::before { content: 'Cambria'; font-family: 'Cambria', Cochin, Georgia, Times, 'Times New Roman', serif; }
+    :host ::ng-deep .ql-picker.ql-font .ql-picker-label[data-value="garamond"]::before, :host ::ng-deep .ql-picker.ql-font .ql-picker-item[data-value="garamond"]::before { content: 'Garamond'; font-family: 'Garamond', serif; }
+    :host ::ng-deep .ql-picker.ql-font .ql-picker-label[data-value="georgia"]::before, :host ::ng-deep .ql-picker.ql-font .ql-picker-item[data-value="georgia"]::before { content: 'Georgia'; font-family: 'Georgia', serif; }
+    :host ::ng-deep .ql-picker.ql-font .ql-picker-label[data-value="book-antiqua"]::before, :host ::ng-deep .ql-picker.ql-font .ql-picker-item[data-value="book-antiqua"]::before { content: 'Book Antiqua'; font-family: 'Book Antiqua', serif; }
+    :host ::ng-deep .ql-picker.ql-font .ql-picker-label[data-value="palatino-linotype"]::before, :host ::ng-deep .ql-picker.ql-font .ql-picker-item[data-value="palatino-linotype"]::before { content: 'Palatino'; font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif; }
+    :host ::ng-deep .ql-picker.ql-font .ql-picker-label[data-value="baskerville-old-face"]::before, :host ::ng-deep .ql-picker.ql-font .ql-picker-item[data-value="baskerville-old-face"]::before { content: 'Baskerville'; font-family: 'Baskerville Old Face', serif; }
+
+    :host ::ng-deep .ql-picker.ql-font .ql-picker-label[data-value="courier-new"]::before, :host ::ng-deep .ql-picker.ql-font .ql-picker-item[data-value="courier-new"]::before { content: 'Courier New'; font-family: 'Courier New', Courier, monospace; }
+    :host ::ng-deep .ql-picker.ql-font .ql-picker-label[data-value="consolas"]::before, :host ::ng-deep .ql-picker.ql-font .ql-picker-item[data-value="consolas"]::before { content: 'Consolas'; font-family: 'Consolas', monospace; }
+    :host ::ng-deep .ql-picker.ql-font .ql-picker-label[data-value="lucida-console"]::before, :host ::ng-deep .ql-picker.ql-font .ql-picker-item[data-value="lucida-console"]::before { content: 'Lucida Console'; font-family: 'Lucida Console', Monaco, monospace; }
+
+    :host ::ng-deep .ql-picker.ql-font .ql-picker-label[data-value="comic-sans-ms"]::before, :host ::ng-deep .ql-picker.ql-font .ql-picker-item[data-value="comic-sans-ms"]::before { content: 'Comic Sans MS'; font-family: 'Comic Sans MS', cursive, sans-serif; }
+    :host ::ng-deep .ql-picker.ql-font .ql-picker-label[data-value="impact"]::before, :host ::ng-deep .ql-picker.ql-font .ql-picker-item[data-value="impact"]::before { content: 'Impact'; font-family: 'Impact', Charcoal, sans-serif; }
+    :host ::ng-deep .ql-picker.ql-font .ql-picker-label[data-value="brush-script-mt"]::before, :host ::ng-deep .ql-picker.ql-font .ql-picker-item[data-value="brush-script-mt"]::before { content: 'Brush Script'; font-family: 'Brush Script MT', cursive; }
+    :host ::ng-deep .ql-picker.ql-font .ql-picker-label[data-value="papyrus"]::before, :host ::ng-deep .ql-picker.ql-font .ql-picker-item[data-value="papyrus"]::before { content: 'Papyrus'; font-family: 'Papyrus', fantasy; }
+    :host ::ng-deep .ql-picker.ql-font .ql-picker-label[data-value="jokerman"]::before, :host ::ng-deep .ql-picker.ql-font .ql-picker-item[data-value="jokerman"]::before { content: 'Jokerman'; font-family: 'Jokerman', fantasy; }
+    :host ::ng-deep .ql-picker.ql-font .ql-picker-label[data-value="edwardian-script-itc"]::before, :host ::ng-deep .ql-picker.ql-font .ql-picker-item[data-value="edwardian-script-itc"]::before { content: 'Edwardian'; font-family: 'Edwardian Script ITC', cursive; }
   `]
 })
 export class AnnouncementFormComponent implements OnInit, OnDestroy {
@@ -284,7 +399,7 @@ export class AnnouncementFormComponent implements OnInit, OnDestroy {
   quillConfig = {
     toolbar: [
       ['bold', 'italic', 'underline', 'strike'],
-      [{ 'font': [] }, { 'size': ['small', false, 'large', 'huge'] }],
+      [{ 'font': Font.whitelist }, { 'size': ['small', false, 'large', 'huge'] }],
       [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
       [{ 'color': [] }, { 'background': [] }],
       [{ 'align': [] }, { 'list': 'ordered' }, { 'list': 'bullet' }],

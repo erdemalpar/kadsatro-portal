@@ -451,29 +451,30 @@ namespace Duyuru.API.Services
 
         private static AnnouncementResponseDto MapToDto(Announcement a)
         {
-            return new AnnouncementResponseDto(
-                Id: a.Id,
-                Title: a.Title,
-                Content: a.Content,
-                Format: a.Format,
-                Status: a.Status.ToString(),
-                RejectionReason: a.RejectionReason,
-                CategoryName: a.Category?.Name ?? "Bilinmiyor",
-                CreatedByName: a.CreatedBy?.FullName ?? "Bilinmiyor",
-                ViewCount: a.ViewCount,
-                CreatedAt: a.CreatedAt,
-                PublishedAt: a.PublishedAt,
-                StartDate: a.StartDate,
-                EndDate: a.EndDate,
-                Frequency: a.Frequency.ToString(),
-                OnceDurationMinutes: a.OnceDurationMinutes,
-                LayoutWidth: a.LayoutWidth,
-                TitleFontFamily: a.TitleFontFamily,
-                TitleFontSize: a.TitleFontSize,
-                TitleIsBold: a.TitleIsBold,
-                TitleColor: a.TitleColor,
-                RepeatInterval: a.RepeatInterval
-            );
+            return new AnnouncementResponseDto
+            {
+                Id = a.Id,
+                Title = a.Title,
+                Content = a.Content,
+                Format = a.Format,
+                Status = a.Status.ToString(),
+                RejectionReason = a.RejectionReason,
+                CategoryName = a.Category?.Name ?? "Bilinmiyor",
+                CreatedByName = a.CreatedBy?.FullName ?? "Bilinmiyor",
+                ViewCount = a.ViewCount,
+                CreatedAt = a.CreatedAt,
+                PublishedAt = a.PublishedAt,
+                StartDate = a.StartDate,
+                EndDate = a.EndDate,
+                Frequency = a.Frequency.ToString(),
+                OnceDurationMinutes = a.OnceDurationMinutes,
+                LayoutWidth = a.LayoutWidth,
+                TitleFontFamily = a.TitleFontFamily,
+                TitleFontSize = a.TitleFontSize,
+                TitleIsBold = a.TitleIsBold,
+                TitleColor = a.TitleColor,
+                RepeatInterval = a.RepeatInterval
+            };
         }
     }
 }

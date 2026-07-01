@@ -12,6 +12,7 @@ builder.Services.AddControllers()
     .AddJsonOptions(options => 
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
     });
 
 builder.Services.AddEndpointsApiExplorer();
@@ -24,6 +25,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Dependency Injection for Services
 builder.Services.AddScoped<IAnnouncementService, AnnouncementService>();
+
+// Süresi dolan duyuruları otomatik Withdrawn yapan arka plan servisi
+builder.Services.AddHostedService<ExpiredAnnouncementCleanupService>();
 
 // CORS Policy for Micro-Frontend (Duyuru: 4202, Portal: 4200)
 builder.Services.AddCors(options =>
