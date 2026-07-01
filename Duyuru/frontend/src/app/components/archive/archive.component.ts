@@ -6,11 +6,12 @@ import { AnnouncementResponseDto } from '../../models/announcement.model';
 import { AuthService } from '../../services/auth.service';
 import { AlertService } from '../../services/alert.service';
 import { Subscription } from 'rxjs';
+import { PaginatorModule } from 'primeng/paginator';
 
 @Component({
   selector: 'app-archive',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PaginatorModule],
   template: `
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col h-full overflow-hidden">
       <!-- Tablo Başlığı ve Arama -->
@@ -32,7 +33,7 @@ import { Subscription } from 'rxjs';
               <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
             </svg>
           </div>
-          <input type="text" (input)="searchQuery = $any($event.target).value"
+          <input type="text" (input)="onSearch($event)"
                  class="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-gray-50 transition-colors" 
                  placeholder="Başlık, kategori, statü ara...">
         </div>
@@ -61,7 +62,7 @@ import { Subscription } from 'rxjs';
             </tr>
 
             <!-- Satırlar -->
-            <tr *ngFor="let item of filteredAnnouncements" class="hover:bg-slate-50 transition-colors group">
+            <tr *ngFor="let item of paginatedAnnouncements" class="hover:bg-slate-50 transition-colors group">
 
               <!-- Tarih -->
               <td class="py-4 px-5 align-middle">
@@ -187,8 +188,18 @@ import { Subscription } from 'rxjs';
            </tbody>
         </table>
       </div>
+      
+      <!-- Paginator -->
+      <p-paginator 
+          (onPageChange)="onPageChange($event)" 
+          [first]="first" 
+          [rows]="rows" 
+          [totalRecords]="filteredAnnouncements.length" 
+          [rowsPerPageOptions]="[5, 10, 20]"
+          styleClass="bg-white border-t border-gray-100 p-2">
+      </p-paginator>
 
-      <!-- Kimler Okudu Modal -->
+    <!-- Kimler Okudu Modal -->
       <div *ngIf="isReadersModalOpen" class="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden animate-[fadeIn_0.3s_ease-out]">
           
@@ -268,9 +279,22 @@ export class ArchiveComponent implements OnInit, OnDestroy {
   isConfirmModalOpen = false;
   confirmModalConfig: any = {};
 
+  first: number = 0;
+  rows: number = 10;
+
   private announcementService = inject(AnnouncementService);
   private authService = inject(AuthService);
   private alertService = inject(AlertService);
+
+  onSearch(event: Event) {
+    this.searchQuery = (event.target as HTMLInputElement).value;
+    this.first = 0; // Arama yapıldığında ilk sayfaya dön
+  }
+
+  onPageChange(event: any) {
+    this.first = event.first;
+    this.rows = event.rows;
+  }
 
   get filteredAnnouncements() {
     if (!this.searchQuery) return this.announcements;
@@ -299,6 +323,11 @@ export class ArchiveComponent implements OnInit, OnDestroy {
               endDate.includes(lowerQ) ||
               rejection.includes(lowerQ);
     });
+  }
+
+  get paginatedAnnouncements() {
+    const filtered = this.filteredAnnouncements;
+    return filtered.slice(this.first, this.first + this.rows);
   }
 
   ngOnInit() {
