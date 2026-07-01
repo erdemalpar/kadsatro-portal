@@ -368,16 +368,18 @@ export class ArchiveComponent implements OnInit, OnDestroy {
 
 
   canApprove(item: AnnouncementResponseDto): boolean {
-    const role = this.authService.currentRole();
-    if (role === 'Editor' && item.status === 'PendingEditor') return true;
-    if (role === 'Moderator' && item.status === 'PendingModerator') return true;
-    if (role === 'Admin' && (item.status === 'PendingEditor' || item.status === 'PendingModerator')) return true;
+    const role = (this.authService.currentRole() || '').toLowerCase();
+    const status = (item.status || '').toLowerCase();
+    if (role === 'editor' && status === 'pendingeditor') return true;
+    if (role === 'moderator' && status === 'pendingmoderator') return true;
+    if (role === 'admin' && (status === 'pendingeditor' || status === 'pendingmoderator')) return true;
     return false;
   }
 
   canWithdraw(item: AnnouncementResponseDto): boolean {
-    const role = this.authService.currentRole();
-    return item.status === 'Published' && (role === 'Admin' || role === 'Editor' || role === 'Moderator');
+    const role = (this.authService.currentRole() || '').toLowerCase();
+    const status = (item.status || '').toLowerCase();
+    return status === 'published' && (role === 'admin' || role === 'editor' || role === 'moderator');
   }
 
   approve(item: AnnouncementResponseDto) {
@@ -427,10 +429,9 @@ export class ArchiveComponent implements OnInit, OnDestroy {
   }
 
   canEditOrDelete(item: AnnouncementResponseDto): boolean {
-    const role = this.authService.currentRole();
+    const role = (this.authService.currentRole() || '').toLowerCase();
     // Admin, Moderatör ve Editör düzenleme ve silme yetkisine sahip.
-    if (role === 'Admin' || role === 'Moderator' || role === 'Editor') return true;
-    return false;
+    return role === 'admin' || role === 'moderator' || role === 'editor';
   }
   
   edit(item: AnnouncementResponseDto) {
@@ -453,10 +454,11 @@ export class ArchiveComponent implements OnInit, OnDestroy {
   }
 
   canViewReaders(item: AnnouncementResponseDto): boolean {
-    const role = this.authService.currentRole();
+    const role = (this.authService.currentRole() || '').toLowerCase();
+    const status = (item.status || '').toLowerCase();
     // User hariç herkes (Admin, Editor, Mod) okuyanları görebilir, tabii duyuru Published ise.
-    if (role === 'User') return false;
-    return item.status === 'Published';
+    if (role === 'user' || role === '') return false;
+    return status === 'published';
   }
 
   async openReadersModal(item: AnnouncementResponseDto) {
