@@ -49,18 +49,7 @@ import { filter } from 'rxjs/operators';
             {{ isPreviewMode ? 'Duyuru Önizlemesi' : 'Yeni Duyuru' }}
           </h3>
           <div class="flex items-center gap-3">
-            <!-- Countdown Göstergesi (Once + süre varsa) -->
-            <div *ngIf="!isPreviewMode && countdownSeconds() !== null"
-                 class="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold"
-                 [ngClass]="{
-                   'bg-indigo-50 text-indigo-600': currentAnnouncement()?.format === 'Glassmorphism' || !currentAnnouncement()?.format,
-                   'bg-white/10 text-white': currentAnnouncement()?.format === 'Story'
-                 }">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              {{ formatCountdown(countdownSeconds()!) }}
-            </div>
+            <!-- Kapat butonu ve icon container -->
             <button (click)="markAsReadAndNext()" class="transition-colors p-1.5 rounded-full"
                     [ngClass]="{
                       'text-gray-500 hover:text-red-500 hover:bg-white/50': currentAnnouncement()?.format === 'Glassmorphism' || !currentAnnouncement()?.format,
@@ -112,15 +101,8 @@ import { filter } from 'rxjs/operators';
                    }"
                    [innerHTML]="currentAnnouncement()?.content"></div>
                    
-              <!-- Cinematic Countdown + Kapat Butonu -->
-              <div *ngIf="currentAnnouncement()?.format === 'Cinematic'" class="mt-16 flex flex-col items-center gap-4">
-                <div *ngIf="!isPreviewMode && countdownSeconds() !== null"
-                     class="flex items-center gap-2 text-gray-400 text-sm">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span>{{ formatCountdown(countdownSeconds()!) }} içinde otomatik kapanacak</span>
-                </div>
+              <!-- Cinematic Kapat Butonu -->
+              <div *ngIf="currentAnnouncement()?.format === 'Cinematic'" class="mt-16 flex items-center gap-4">
                 <button (click)="markAsReadAndNext()" 
                         class="px-12 py-4 rounded-full border border-white/20 text-white font-bold tracking-widest uppercase hover:bg-white hover:text-black transition-all duration-300">
                    Kapat
@@ -141,31 +123,6 @@ import { filter } from 'rxjs/operators';
           </span>
           <div class="flex-1"></div>
 
-          <!-- Countdown Progress Bar (Once + süre varsa) -->
-          <div *ngIf="!isPreviewMode && countdownSeconds() !== null && countdownTotal() > 0"
-               class="flex items-center gap-3 mr-4">
-            <div class="w-24 h-1.5 rounded-full overflow-hidden"
-                 [ngClass]="{
-                   'bg-indigo-100': currentAnnouncement()?.format === 'Glassmorphism' || !currentAnnouncement()?.format,
-                   'bg-white/20': currentAnnouncement()?.format === 'Story'
-                 }">
-              <div class="h-full rounded-full transition-all duration-1000 ease-linear"
-                   [ngClass]="{
-                     'bg-indigo-500': currentAnnouncement()?.format === 'Glassmorphism' || !currentAnnouncement()?.format,
-                     'bg-white/60': currentAnnouncement()?.format === 'Story'
-                   }"
-                   [style.width.%]="(countdownSeconds()! / countdownTotal()) * 100">
-              </div>
-            </div>
-            <span class="text-xs font-bold tabular-nums"
-                  [ngClass]="{
-                    'text-indigo-500': currentAnnouncement()?.format === 'Glassmorphism' || !currentAnnouncement()?.format,
-                    'text-white/80': currentAnnouncement()?.format === 'Story'
-                  }">
-              {{ formatCountdown(countdownSeconds()!) }}
-            </span>
-          </div>
-
           <button (click)="markAsReadAndNext()" class="px-8 py-3 rounded-xl text-sm font-bold transition-all shadow-lg hover:shadow-xl active:scale-95"
                   [ngClass]="{
                     'bg-indigo-600 text-white hover:bg-indigo-700': currentAnnouncement()?.format === 'Glassmorphism' || !currentAnnouncement()?.format,
@@ -183,11 +140,6 @@ import { filter } from 'rxjs/operators';
       <div class="flex justify-between items-start mb-3">
         <h4 class="font-bold text-gray-800 text-sm pr-4">{{ currentAnnouncement()?.title }}</h4>
         <div class="flex items-center gap-2 shrink-0">
-          <!-- Toast Countdown -->
-          <span *ngIf="!isPreviewMode && countdownSeconds() !== null"
-                class="text-xs font-bold text-indigo-500 tabular-nums">
-            {{ formatCountdown(countdownSeconds()!) }}
-          </span>
           <button (click)="markAsReadAndNext()" class="text-gray-400 hover:text-gray-600 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
@@ -195,14 +147,6 @@ import { filter } from 'rxjs/operators';
       </div>
       <div class="text-sm text-gray-600 line-clamp-3 prose" [innerHTML]="currentAnnouncement()?.content"></div>
       
-      <!-- Toast Progress Bar -->
-      <div *ngIf="!isPreviewMode && countdownSeconds() !== null && countdownTotal() > 0"
-           class="mt-3 h-1 rounded-full bg-indigo-100 overflow-hidden">
-        <div class="h-full rounded-full bg-indigo-500 transition-all duration-1000 ease-linear"
-             [style.width.%]="(countdownSeconds()! / countdownTotal()) * 100">
-        </div>
-      </div>
-
       <div class="mt-4 flex justify-end">
          <button (click)="markAsReadAndNext()" class="px-4 py-1.5 bg-indigo-50 text-indigo-600 rounded-md text-xs font-bold hover:bg-indigo-100 transition-colors">
            Kapat
@@ -228,12 +172,9 @@ export class GlobalAnnouncementViewerComponent implements OnInit, OnDestroy {
 
   queue = signal<any[]>([]);
   currentAnnouncement = signal<any | null>(null);
+  pollingInterval: any;
+  
   isPreviewMode = false;
-
-  // Countdown state
-  countdownSeconds = signal<number | null>(null);
-  countdownTotal = signal<number>(0);
-  private countdownTimerId: any = null;
 
   ngOnInit() {
     // İlk açılışta veriyi çek (Login sonrası Token & Auth işleminin oturması için ufak bir gecikme)
@@ -245,7 +186,6 @@ export class GlobalAnnouncementViewerComponent implements OnInit, OnDestroy {
     this.sub.add(
       this.announcementService.previewAnnouncement$.subscribe(data => {
         this.isPreviewMode = true;
-        this.stopCountdown();
         this.currentAnnouncement.set(data);
       })
     );
@@ -264,6 +204,18 @@ export class GlobalAnnouncementViewerComponent implements OnInit, OnDestroy {
         this.fetchUnreadAnnouncements();
       })
     );
+
+    // Sıklık modları için periyodik kontrol (Her 1 dakikada bir)
+    this.pollingInterval = setInterval(() => {
+      this.fetchUnreadAnnouncements();
+    }, 60000);
+  }
+
+  ngOnDestroy() {
+    this.sub.unsubscribe();
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+    }
   }
 
   async fetchUnreadAnnouncements() {
@@ -310,63 +262,13 @@ export class GlobalAnnouncementViewerComponent implements OnInit, OnDestroy {
     if (q.length > 0) {
       this.isPreviewMode = false;
       this.currentAnnouncement.set(q[0]);
-      this.startCountdownIfNeeded(q[0]);
     } else {
       this.currentAnnouncement.set(null);
-      this.stopCountdown();
     }
-  }
-
-  /** Once sıklığında ve onceDurationMinutes tanımlanmışsa geri sayım başlat */
-  private startCountdownIfNeeded(announcement: any) {
-    this.stopCountdown();
-
-    const dakika = announcement?.onceDurationMinutes;
-    if (announcement?.frequency !== 'Once' || !dakika || dakika <= 0) {
-      this.countdownSeconds.set(null);
-      this.countdownTotal.set(0);
-      return;
-    }
-
-    const toplamSaniye = dakika * 60;
-    this.countdownSeconds.set(toplamSaniye);
-    this.countdownTotal.set(toplamSaniye);
-
-    this.countdownTimerId = setInterval(() => {
-      const kalan = this.countdownSeconds();
-      if (kalan === null || kalan <= 1) {
-        this.stopCountdown();
-        this.markAsReadAndNext();
-      } else {
-        this.countdownSeconds.set(kalan - 1);
-      }
-    }, 1000);
-  }
-
-  private stopCountdown() {
-    if (this.countdownTimerId) {
-      clearInterval(this.countdownTimerId);
-      this.countdownTimerId = null;
-    }
-    this.countdownSeconds.set(null);
-    this.countdownTotal.set(0);
-  }
-
-  /** Saniyeyi "2:30" veya "1:05:00" formatına çevir */
-  formatCountdown(saniye: number): string {
-    if (saniye <= 0) return '0:00';
-    const sa = Math.floor(saniye / 3600);
-    const dk = Math.floor((saniye % 3600) / 60);
-    const sn = saniye % 60;
-    if (sa > 0) {
-      return `${sa}:${dk.toString().padStart(2, '0')}:${sn.toString().padStart(2, '0')}`;
-    }
-    return `${dk}:${sn.toString().padStart(2, '0')}`;
   }
 
   async markAsReadAndNext() {
     const current = this.currentAnnouncement();
-    this.stopCountdown();
     
     // Eğer önizleme modundaysa DB'ye yazma, direkt kapat
     if (this.isPreviewMode) {
@@ -408,8 +310,4 @@ export class GlobalAnnouncementViewerComponent implements OnInit, OnDestroy {
     return format === 'Toast';
   }
 
-  ngOnDestroy() {
-    this.stopCountdown();
-    this.sub.unsubscribe();
-  }
 }

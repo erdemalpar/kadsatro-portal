@@ -39,14 +39,6 @@ const POLLING_MS  = 30_000;
             Yeni Duyuru
           </h3>
           <div class="flex items-center gap-3">
-            <span *ngIf="kalanSaniye() !== null"
-                  [ngClass]="badgeClass()"
-                  class="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
-              {{ formatSaniye(kalanSaniye()!) }}
-            </span>
             <button (click)="kapat()" [ngClass]="kapatBtnClass()" class="p-1.5 rounded-full transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -71,9 +63,6 @@ const POLLING_MS  = 30_000;
 
             <!-- Cinematic alt -->
             <div *ngIf="current()?.format === 'Cinematic'" class="mt-16 flex flex-col items-center gap-4">
-              <p *ngIf="kalanSaniye() !== null" class="text-gray-400 text-sm">
-                {{ formatSaniye(kalanSaniye()!) }} içinde otomatik kapanacak
-              </p>
               <button (click)="kapat()"
                       class="px-12 py-4 rounded-full border border-white/20 text-white font-bold tracking-widest uppercase hover:bg-white hover:text-black transition-all duration-300">
                 Kapat
@@ -91,15 +80,6 @@ const POLLING_MS  = 30_000;
           </span>
           <div class="flex-1"></div>
 
-          <div *ngIf="kalanSaniye() !== null && toplamSaniye() > 0"
-               class="flex items-center gap-3 mr-4">
-            <div class="w-24 h-1.5 rounded-full overflow-hidden bg-indigo-100">
-              <div class="h-full rounded-full bg-indigo-500 transition-all duration-1000 ease-linear"
-                   [style.width.%]="(kalanSaniye()! / toplamSaniye()) * 100"></div>
-            </div>
-            <span class="text-xs font-bold text-indigo-500 tabular-nums">{{ formatSaniye(kalanSaniye()!) }}</span>
-          </div>
-
           <button (click)="kapat()" [ngClass]="okudumClass()"
                   class="px-8 py-3 rounded-xl text-sm font-bold transition-all shadow-lg hover:shadow-xl active:scale-95">
             Okudum, Kapat
@@ -114,9 +94,6 @@ const POLLING_MS  = 30_000;
       <div class="flex justify-between items-start mb-3">
         <h4 class="font-bold text-gray-800 text-sm pr-4">{{ current()?.title }}</h4>
         <div class="flex items-center gap-2 shrink-0">
-          <span *ngIf="kalanSaniye() !== null" class="text-xs font-bold text-indigo-500 tabular-nums">
-            {{ formatSaniye(kalanSaniye()!) }}
-          </span>
           <button (click)="kapat()" class="text-gray-400 hover:text-gray-600 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -125,11 +102,6 @@ const POLLING_MS  = 30_000;
         </div>
       </div>
       <div class="text-sm text-gray-600 line-clamp-3 prose" [innerHTML]="current()?.content"></div>
-      <div *ngIf="kalanSaniye() !== null && toplamSaniye() > 0"
-           class="mt-3 h-1 rounded-full bg-indigo-100 overflow-hidden">
-        <div class="h-full rounded-full bg-indigo-500 transition-all duration-1000 ease-linear"
-             [style.width.%]="(kalanSaniye()! / toplamSaniye()) * 100"></div>
-      </div>
       <div class="mt-4 flex justify-end">
         <button (click)="kapat()"
                 class="px-4 py-1.5 bg-indigo-50 text-indigo-600 rounded-md text-xs font-bold hover:bg-indigo-100 transition-colors">
@@ -142,10 +114,7 @@ const POLLING_MS  = 30_000;
 export class AnnouncementPopupComponent implements OnInit, OnDestroy {
   kuyruk       = signal<any[]>([]);
   current      = signal<any | null>(null);
-  kalanSaniye  = signal<number | null>(null);
-  toplamSaniye = signal<number>(0);
 
-  private countdownId: any = null;
   private pollingId:   any = null;
   private hub: signalR.HubConnection | null = null;
 
@@ -165,7 +134,6 @@ export class AnnouncementPopupComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     clearInterval(this.pollingId);
-    this.durdurSayac();
     this.hub?.stop();
   }
 
@@ -207,16 +175,13 @@ export class AnnouncementPopupComponent implements OnInit, OnDestroy {
     const q = this.kuyruk();
     if (q.length > 0) {
       this.current.set(q[0]);
-      this.baslatSayac(q[0]);
     } else {
       this.current.set(null);
-      this.durdurSayac();
     }
   }
 
   async kapat() {
     const ann = this.current();
-    this.durdurSayac();
     if (ann?.id) {
       try {
         await fetch(`${DUYURU_API}/${ann.id}/read?userId=${this.userId}`, { method: 'POST' });
@@ -235,41 +200,7 @@ export class AnnouncementPopupComponent implements OnInit, OnDestroy {
     this.siraya();
   }
 
-  private baslatSayac(ann: any) {
-    this.durdurSayac();
-    const dakika = ann?.onceDurationMinutes;
-    if (ann?.frequency !== 'Once' || !dakika || dakika <= 0) {
-      this.kalanSaniye.set(null);
-      this.toplamSaniye.set(0);
-      return;
-    }
-    const toplam = dakika * 60;
-    this.kalanSaniye.set(toplam);
-    this.toplamSaniye.set(toplam);
-    this.countdownId = setInterval(() => {
-      const kalan = this.kalanSaniye();
-      if (kalan === null || kalan <= 1) { this.durdurSayac(); this.kapat(); }
-      else { this.kalanSaniye.set(kalan - 1); }
-    }, 1000);
-  }
-
-  private durdurSayac() {
-    if (this.countdownId) { clearInterval(this.countdownId); this.countdownId = null; }
-    this.kalanSaniye.set(null);
-    this.toplamSaniye.set(0);
-  }
-
   isToast(): boolean { return this.current()?.format === 'Toast'; }
-
-  formatSaniye(s: number): string {
-    if (s <= 0) return '0:00';
-    const sa = Math.floor(s / 3600);
-    const dk = Math.floor((s % 3600) / 60);
-    const sn = s % 60;
-    return sa > 0
-      ? `${sa}:${dk.toString().padStart(2,'0')}:${sn.toString().padStart(2,'0')}`
-      : `${dk}:${sn.toString().padStart(2,'0')}`;
-  }
 
   private dismissedList(): number[] {
     const raw = sessionStorage.getItem('dismissed_announcements');

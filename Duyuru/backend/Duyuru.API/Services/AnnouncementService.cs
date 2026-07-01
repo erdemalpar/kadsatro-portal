@@ -74,13 +74,11 @@ namespace Duyuru.API.Services
                 await _hubContext.Clients.All.SendAsync("ReceiveNewAnnouncement");
             }
 
-            // Kategori ve CreatedBy verisini dahil edip dönmek için tekrar yüklüyoruz
-            var created = await _context.Announcements
-                .Include(a => a.Category)
-                .Include(a => a.CreatedBy)
-                .FirstAsync(a => a.Id == announcement.Id);
+            // Kategori ve CreatedBy verisini açıkça yükleyip dönüyoruz
+            await _context.Entry(announcement).Reference(a => a.Category).LoadAsync();
+            await _context.Entry(announcement).Reference(a => a.CreatedBy).LoadAsync();
 
-            return MapToDto(created);
+            return MapToDto(announcement);
         }
 
         public async Task<AnnouncementResponseDto?> UpdateStatusAsync(int id, UpdateAnnouncementStatusDto dto, Role userRole)
@@ -197,6 +195,7 @@ namespace Duyuru.API.Services
             announcement.RejectionReason = null; // Düzenlendiği için reddedilme sebebini temizle
 
             await _context.SaveChangesAsync();
+            await _context.Entry(announcement).Reference(a => a.Category).LoadAsync();
             return MapToDto(announcement);
         }
 

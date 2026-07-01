@@ -82,15 +82,19 @@ import { Subscription } from 'rxjs';
                   </span>
 
                   <!-- Sıklık -->
-                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-purple-50 text-purple-600 border border-purple-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                    </svg>
-                    {{ getFrequencyText(item.frequency) }}
-                    <ng-container *ngIf="item.frequency === 'Once' && item.onceDurationMinutes">
-                      ({{ formatDuration(item.onceDurationMinutes) }})
-                    </ng-container>
-                  </span>
+                  <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border"
+                          [ngClass]="{
+                            'bg-purple-50 text-purple-700 border-purple-200': item.frequency === 'Once',
+                            'bg-orange-50 text-orange-700 border-orange-200': item.frequency === 'Daily',
+                            'bg-teal-50 text-teal-700 border-teal-200': item.frequency === 'Always'
+                          }">
+                      <svg *ngIf="item.frequency === 'Once'" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                      <svg *ngIf="item.frequency === 'Daily'" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                      <svg *ngIf="item.frequency === 'Always'" xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                      {{ getFrequencyText(item.frequency) }} {{ item.frequency === 'Once' && (item.onceDurationMinutes || $any(item).OnceDurationMinutes) ? '(' + (item.onceDurationMinutes || $any(item).OnceDurationMinutes) + ' dk)' : '' }}
+                    </span>
+                  </div>
 
 
                   <!-- Yayın aralığı -->
@@ -99,9 +103,9 @@ import { Subscription } from 'rxjs';
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
-                    {{ item.startDate ? (item.startDate | date:'dd.MM.yy') : '—' }}
+                    {{ item.startDate ? (item.startDate | date:'dd.MM.yy HH:mm') : '—' }}
                     →
-                    {{ item.endDate ? (item.endDate | date:'dd.MM.yy') : '∞' }}
+                    {{ item.endDate ? (item.endDate | date:'dd.MM.yy HH:mm') : '∞' }}
                   </span>
                 </div>
 
@@ -263,10 +267,26 @@ export class ArchiveComponent implements OnInit, OnDestroy {
     
     return this.announcements.filter(a => {
        const statusText = this.getStatusText(a.status).toLowerCase();
-       return a.title.toLowerCase().includes(lowerQ) ||
-              a.categoryName.toLowerCase().includes(lowerQ) ||
+       const formatText = this.getFormatText(a.format || '').toLowerCase();
+       const freqText = this.getFrequencyText(a.frequency || '').toLowerCase();
+       const createDate = a.createdAt ? new Date(a.createdAt).toLocaleDateString('tr-TR') : '';
+       const startDate = a.startDate ? new Date(a.startDate).toLocaleDateString('tr-TR') : '';
+       const endDate = a.endDate ? new Date(a.endDate).toLocaleDateString('tr-TR') : '';
+       const createdBy = (a.createdByName || '').toLowerCase();
+       const title = (a.title || '').toLowerCase();
+       const category = (a.categoryName || '').toLowerCase();
+       const rejection = (a.rejectionReason || '').toLowerCase();
+
+       return title.includes(lowerQ) ||
+              category.includes(lowerQ) ||
               statusText.includes(lowerQ) ||
-              (a.rejectionReason && a.rejectionReason.toLowerCase().includes(lowerQ));
+              formatText.includes(lowerQ) ||
+              freqText.includes(lowerQ) ||
+              createdBy.includes(lowerQ) ||
+              createDate.includes(lowerQ) ||
+              startDate.includes(lowerQ) ||
+              endDate.includes(lowerQ) ||
+              rejection.includes(lowerQ);
     });
   }
 

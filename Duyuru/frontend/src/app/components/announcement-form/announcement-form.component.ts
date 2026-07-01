@@ -61,15 +61,15 @@ import { Editor, Toolbar, NgxEditorModule } from 'ngx-editor';
           </div>
           <div>
             <label class="block text-xs font-bold text-gray-700 mb-1">Başlangıç</label>
-            <input type="date" [(ngModel)]="startDate" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-color)]">
+            <input type="datetime-local" [(ngModel)]="startDate" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-color)]">
           </div>
           <div>
             <label class="block text-xs font-bold text-gray-700 mb-1">Bitiş</label>
-            <input type="date" [(ngModel)]="endDate" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-color)]">
+            <input type="datetime-local" [(ngModel)]="endDate" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-color)]">
           </div>
         </div>
 
-        <!-- "Bir Kez" Sıklığı için Gösterim Süresi (Sadece Admin/Moderator) -->
+        <!-- "Sıklık" için Tekrarlama Süresi -->
         <div *ngIf="frequency === 'Once' && canSetDuration()"
              class="flex items-start gap-3 p-3 rounded-xl border border-indigo-200 bg-indigo-50/60 animate-[fadeIn_0.2s_ease-out]">
           <div class="mt-0.5 shrink-0 w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
@@ -80,8 +80,8 @@ import { Editor, Toolbar, NgxEditorModule } from 'ngx-editor';
           </div>
           <div class="flex-1">
             <label class="block text-xs font-bold text-gray-700 mb-1">
-              Gösterim Süresi
-              <span class="ml-1 font-normal text-gray-400">(opsiyonel — boş = manuel kapat)</span>
+              Tekrarlama Aralığı
+              <span class="ml-1 font-normal text-gray-400">(opsiyonel)</span>
             </label>
             <div class="flex items-center gap-2">
               <input
@@ -89,7 +89,7 @@ import { Editor, Toolbar, NgxEditorModule } from 'ngx-editor';
                 [(ngModel)]="onceDurationMinutes"
                 [min]="1"
                 [max]="1440"
-                placeholder="—"
+                placeholder="Örn: 1"
                 class="w-24 border border-indigo-200 rounded-lg px-3 py-2 text-sm font-semibold text-center
                        focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white
                        [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -97,11 +97,11 @@ import { Editor, Toolbar, NgxEditorModule } from 'ngx-editor';
               <span class="text-sm text-gray-500 font-medium">dakika</span>
               <span *ngIf="onceDurationMinutes && onceDurationMinutes > 0"
                     class="ml-2 text-xs font-semibold text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded-full">
-                {{ formatDuration(onceDurationMinutes) }}
+                Her {{ onceDurationMinutes }} dakikada bir
               </span>
             </div>
             <p class="mt-1 text-[10px] text-gray-400 leading-snug">
-              Bu süre dolunca duyuru otomatik olarak kullanıcı ekranından kaybolur.
+              Seçilen dakika dolduğunda yayın tekrar gösterilir. Boş bırakılırsa tekrarlanmaz.
             </p>
           </div>
         </div>
@@ -295,9 +295,15 @@ export class AnnouncementFormComponent implements OnInit, OnDestroy {
     this.format = ann.format;
     this.categoryId = ann.categoryId || 1;
     this.frequency = ann.frequency || 'Once';
-    this.startDate = ann.startDate ? ann.startDate.split('T')[0] : null;
-    this.endDate = ann.endDate ? ann.endDate.split('T')[0] : null;
-    this.onceDurationMinutes = ann.onceDurationMinutes ?? null;
+    const toLocalDatetime = (dateString: string | null) => {
+      if (!dateString) return null;
+      const d = new Date(dateString);
+      return new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+    };
+
+    this.startDate = toLocalDatetime(ann.startDate || ann.StartDate);
+    this.endDate = toLocalDatetime(ann.endDate || ann.EndDate);
+    this.onceDurationMinutes = ann.onceDurationMinutes ?? ann.OnceDurationMinutes ?? null;
   }
 
   triggerFileInput(fileInput: HTMLInputElement, type: 'image' | 'video') {

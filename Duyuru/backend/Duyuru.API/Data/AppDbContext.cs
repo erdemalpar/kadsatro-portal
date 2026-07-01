@@ -19,15 +19,16 @@ namespace Duyuru.API.Data
             
             // Seed Mock Data
             modelBuilder.Entity<Category>().HasData(
-                new Category { Id = 1, Name = "Kanun" },
-                new Category { Id = 2, Name = "KHK" },
-                new Category { Id = 3, Name = "Tüzük" },
-                new Category { Id = 4, Name = "Yönetmelik" },
-                new Category { Id = 5, Name = "Genelge" },
-                new Category { Id = 6, Name = "Talimat" },
-                new Category { Id = 7, Name = "Tebliğ" },
-                new Category { Id = 8, Name = "Sirküler" },
-                new Category { Id = 9, Name = "Duyuru" }
+                new Category { Id = 1, Name = "Genel Duyurular" },
+                new Category { Id = 2, Name = "Yazılım ve Güncellemeler" },
+                new Category { Id = 3, Name = "Mevzuat ve Kanun" },
+                new Category { Id = 4, Name = "Eğitim" },
+                new Category { Id = 5, Name = "Megsis" },
+                new Category { Id = 6, Name = "Sistemsel" },
+                new Category { Id = 7, Name = "Talimat" },
+                new Category { Id = 8, Name = "Genelge" },
+                new Category { Id = 9, Name = "Acil Duyuru" },
+                new Category { Id = 10, Name = "Sağlık" }
             );
 
             modelBuilder.Entity<User>().HasData(
