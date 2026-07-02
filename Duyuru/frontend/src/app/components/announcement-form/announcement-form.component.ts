@@ -56,13 +56,85 @@ class CustomVideoBlot extends BlockEmbed {
 Quill.register(CustomVideoBlot, true);
 
 // @ts-ignore
-import BlotFormatter, { ImageSpec, IframeVideoSpec, UnclickableBlotSpec } from '@enzedonline/quill-blot-formatter2';
+import BlotFormatter, { ImageSpec, IframeVideoSpec, UnclickableBlotSpec, Action, AlignAction, ResizeAction, DeleteAction } from '@enzedonline/quill-blot-formatter2';
+
+class CustomSizeAction extends Action {
+  button: HTMLElement | null = null;
+
+  override onCreate = () => {
+    this.button = document.createElement('div');
+    this.button.classList.add('blot-formatter__toolbar-button');
+    // Simple SVG icon for resizing (ruler or expand)
+    this.button.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" style="margin:auto"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>';
+    this.button.title = "Elle Boyutlandır (px veya %)";
+    this.button.style.display = 'inline-flex';
+    this.button.style.alignItems = 'center';
+    this.button.style.justifyContent = 'center';
+    this.button.style.width = '24px';
+    this.button.style.height = '24px';
+    this.button.style.cursor = 'pointer';
+
+    this.button.onclick = (e) => {
+      e.preventDefault();
+      // @ts-ignore
+      const spec = this.formatter.currentSpec;
+      if (!spec) return;
+      const el = spec.getTargetElement();
+      if (!el) return;
+
+      const currentWidth = el.style.width || el.getAttribute('width') || '';
+      const w = prompt('Genişlik giriniz (Örn: 500px, 100%, 20rem):', currentWidth);
+      if (w !== null) {
+        el.style.width = w;
+        el.removeAttribute('width');
+      }
+
+      const currentHeight = el.style.height || el.getAttribute('height') || '';
+      const h = prompt('Yükseklik giriniz (Örn: auto, 300px):', currentHeight);
+      if (h !== null) {
+        el.style.height = h;
+        el.removeAttribute('height');
+      }
+
+      // @ts-ignore
+      this.formatter.update();
+    };
+
+    setTimeout(() => {
+      // @ts-ignore
+      const toolbar = this.formatter.overlay?.querySelector('.blot-formatter__toolbar');
+      if (toolbar && this.button) {
+        toolbar.appendChild(this.button);
+      }
+    }, 0);
+  };
+
+  override onDestroy = () => {
+    if (this.button && this.button.parentNode) {
+      this.button.parentNode.removeChild(this.button);
+    }
+    this.button = null;
+  };
+
+  override onUpdate = () => {};
+}
+
+class CustomImageSpec extends ImageSpec {
+    override getActions = () => [new AlignAction(this.formatter), new ResizeAction(this.formatter), new DeleteAction(this.formatter), new CustomSizeAction(this.formatter)];
+}
+class CustomIframeVideoSpec extends IframeVideoSpec {
+    override getActions = () => [new AlignAction(this.formatter), new ResizeAction(this.formatter), new DeleteAction(this.formatter), new CustomSizeAction(this.formatter)];
+}
 
 class NativeVideoSpec extends UnclickableBlotSpec {
     constructor(formatter: any) {
         super(formatter);
         this.selector = 'video';
     }
+}
+
+class CustomNativeVideoSpec extends NativeVideoSpec {
+    override getActions = () => [new AlignAction(this.formatter), new ResizeAction(this.formatter), new DeleteAction(this.formatter), new CustomSizeAction(this.formatter)];
 }
 
 Quill.register('modules/blotFormatter', BlotFormatter);
@@ -423,9 +495,9 @@ export class AnnouncementFormComponent implements OnInit, OnDestroy {
     ],
     blotFormatter: {
       specs: [
-        ImageSpec,
-        IframeVideoSpec,
-        NativeVideoSpec
+        CustomImageSpec,
+        CustomIframeVideoSpec,
+        CustomNativeVideoSpec
       ]
     }
   };

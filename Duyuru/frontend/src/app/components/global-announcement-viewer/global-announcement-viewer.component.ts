@@ -202,8 +202,8 @@ import { DomSanitizer } from '@angular/platform-browser';
 
     :host ::ng-deep .prose img,
     :host ::ng-deep .prose video {
-      display: inline-block !important;
-      margin: 4px !important;
+      display: inline-block;
+      margin: 4px;
       max-width: 100%;
       border-radius: 12px;
       vertical-align: middle;
