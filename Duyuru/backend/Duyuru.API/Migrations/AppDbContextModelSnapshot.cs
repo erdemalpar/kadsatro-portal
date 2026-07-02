@@ -23,6 +23,12 @@ namespace Duyuru.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("BackgroundColor")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("BackgroundImageUrl")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("CategoryId")
                         .HasColumnType("INTEGER");
 
@@ -45,6 +51,9 @@ namespace Duyuru.API.Migrations
 
                     b.Property<int>("Frequency")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("HeaderMediaUrl")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("LayoutWidth")
                         .IsRequired()

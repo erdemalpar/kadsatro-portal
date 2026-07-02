@@ -19,6 +19,9 @@ namespace Duyuru.API.DTOs
         public bool TitleIsBold { get; init; }
         public string? TitleColor { get; init; }
         public string RepeatInterval { get; init; } = "None";
+        public string? HeaderMediaUrl { get; init; }
+        public string? BackgroundColor { get; init; }
+        public string? BackgroundImageUrl { get; init; }
     }
 
     public record UpdateAnnouncementStatusDto(
@@ -42,6 +45,9 @@ namespace Duyuru.API.DTOs
         public bool TitleIsBold { get; init; }
         public string? TitleColor { get; init; }
         public string RepeatInterval { get; init; } = "None";
+        public string? HeaderMediaUrl { get; init; }
+        public string? BackgroundColor { get; init; }
+        public string? BackgroundImageUrl { get; init; }
     }
 
     public record DashboardStatsDto(
@@ -80,5 +86,8 @@ namespace Duyuru.API.DTOs
         public bool TitleIsBold { get; init; }
         public string? TitleColor { get; init; }
         public string RepeatInterval { get; init; } = "None";
+        public string? HeaderMediaUrl { get; init; }
+        public string? BackgroundColor { get; init; }
+        public string? BackgroundImageUrl { get; init; }
     }
 }

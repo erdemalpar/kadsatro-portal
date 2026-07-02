@@ -68,6 +68,9 @@ namespace Duyuru.API.Services
                 TitleIsBold = dto.TitleIsBold,
                 TitleColor = dto.TitleColor,
                 RepeatInterval = dto.RepeatInterval ?? "None",
+                HeaderMediaUrl = dto.HeaderMediaUrl,
+                BackgroundColor = dto.BackgroundColor,
+                BackgroundImageUrl = dto.BackgroundImageUrl,
                 CreatedAt = DateTime.UtcNow,
                 PublishedAt = initialStatus == AnnouncementStatus.Published ? DateTime.UtcNow : null
             };
@@ -170,6 +173,9 @@ namespace Duyuru.API.Services
             announcement.TitleIsBold = dto.TitleIsBold;
             announcement.TitleColor = dto.TitleColor;
             announcement.RepeatInterval = dto.RepeatInterval ?? "None";
+            announcement.HeaderMediaUrl = dto.HeaderMediaUrl;
+            announcement.BackgroundColor = dto.BackgroundColor;
+            announcement.BackgroundImageUrl = dto.BackgroundImageUrl;
             announcement.CategoryId = dto.CategoryId;
             announcement.StartDate = dto.StartDate;
             announcement.EndDate = dto.EndDate;
@@ -473,7 +479,10 @@ namespace Duyuru.API.Services
                 TitleFontSize = a.TitleFontSize,
                 TitleIsBold = a.TitleIsBold,
                 TitleColor = a.TitleColor,
-                RepeatInterval = a.RepeatInterval
+                RepeatInterval = a.RepeatInterval,
+                HeaderMediaUrl = a.HeaderMediaUrl,
+                BackgroundColor = a.BackgroundColor,
+                BackgroundImageUrl = a.BackgroundImageUrl
             };
         }
     }

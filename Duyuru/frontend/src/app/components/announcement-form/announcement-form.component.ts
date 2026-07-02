@@ -329,6 +329,34 @@ Quill.register(Font, true);
           </div>
         </div>
 
+        <!-- Görsel Tasarım & Medya -->
+        <div class="p-4 rounded-xl border border-pink-200 bg-pink-50/60 animate-[fadeIn_0.2s_ease-out]">
+          <label class="flex text-xs font-bold text-gray-800 mb-3 items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>
+            Görsel Tasarım & Medya
+          </label>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">Arka Plan Rengi</label>
+              <input type="color" [(ngModel)]="backgroundColor" class="w-full h-9 rounded cursor-pointer border border-gray-200 bg-white p-0.5">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">Arka Plan Resmi</label>
+              <div class="flex gap-2 h-9">
+                <input type="text" [(ngModel)]="backgroundImageUrl" placeholder="URL veya Yükle" class="flex-1 w-full border border-gray-200 rounded-lg px-2 text-xs focus:ring-1 focus:ring-pink-400">
+                <button (click)="triggerFileInput(fileInput, 'bg_image')" class="shrink-0 bg-white hover:bg-gray-50 text-gray-700 px-3 rounded-lg border border-gray-200 transition-colors shadow-sm"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></button>
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-gray-700 mb-1">Üst Medya (Kapak)</label>
+              <div class="flex gap-2 h-9">
+                <input type="text" [(ngModel)]="headerMediaUrl" placeholder="URL veya Yükle" class="flex-1 w-full border border-gray-200 rounded-lg px-2 text-xs focus:ring-1 focus:ring-pink-400">
+                <button (click)="triggerFileInput(fileInput, 'header_media')" class="shrink-0 bg-white hover:bg-gray-50 text-gray-700 px-3 rounded-lg border border-gray-200 transition-colors shadow-sm"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- İçerik (Quill) -->
         <div class="flex-1 flex flex-col min-h-[350px]">
           <label class="block text-xs font-bold text-gray-700 mb-1">İçerik</label>
@@ -478,10 +506,13 @@ export class AnnouncementFormComponent implements OnInit, OnDestroy {
   titleIsBold = true;
   titleColor = '#1f2937';
   repeatInterval = 'None';
+  headerMediaUrl: string | null = null;
+  backgroundColor: string | null = null;
+  backgroundImageUrl: string | null = null;
 
   editId: number | null = null;
   isUploading = false;
-  currentUploadType: 'image' | 'video' = 'image';
+  currentUploadType: 'image' | 'video' | 'bg_image' | 'header_media' = 'image';
 
   quillConfig = {
     toolbar: [
@@ -563,6 +594,9 @@ export class AnnouncementFormComponent implements OnInit, OnDestroy {
     this.titleIsBold = true;
     this.titleColor = '#1f2937';
     this.repeatInterval = 'None';
+    this.headerMediaUrl = null;
+    this.backgroundColor = null;
+    this.backgroundImageUrl = null;
   }
 
   getSubmitButtonText(): string {
@@ -581,7 +615,10 @@ export class AnnouncementFormComponent implements OnInit, OnDestroy {
         titleFontFamily: this.titleFontFamily,
         titleFontSize: this.titleFontSize,
         titleIsBold: this.titleIsBold,
-        titleColor: this.titleColor
+        titleColor: this.titleColor,
+        headerMediaUrl: this.headerMediaUrl,
+        backgroundColor: this.backgroundColor,
+        backgroundImageUrl: this.backgroundImageUrl
       } as any);
     }
   }
@@ -608,11 +645,20 @@ export class AnnouncementFormComponent implements OnInit, OnDestroy {
     this.titleIsBold = ann.titleIsBold ?? ann.TitleIsBold ?? true;
     this.titleColor = ann.titleColor || ann.TitleColor || '#1f2937';
     this.repeatInterval = ann.repeatInterval || ann.RepeatInterval || 'None';
+    this.headerMediaUrl = ann.headerMediaUrl || ann.HeaderMediaUrl || null;
+    this.backgroundColor = ann.backgroundColor || ann.BackgroundColor || null;
+    this.backgroundImageUrl = ann.backgroundImageUrl || ann.BackgroundImageUrl || null;
   }
 
-  triggerFileInput(fileInput: HTMLInputElement, type: 'image' | 'video') {
+  triggerFileInput(fileInput: HTMLInputElement, type: 'image' | 'video' | 'bg_image' | 'header_media') {
     this.currentUploadType = type;
-    fileInput.accept = type === 'image' ? 'image/*' : 'video/*';
+    if (type === 'image' || type === 'bg_image') {
+      fileInput.accept = 'image/*';
+    } else if (type === 'video') {
+      fileInput.accept = 'video/*';
+    } else {
+      fileInput.accept = 'image/*,video/*';
+    }
     fileInput.click();
   }
 
@@ -625,7 +671,11 @@ export class AnnouncementFormComponent implements OnInit, OnDestroy {
     this.isUploading = false;
 
     if (url) {
-      if (this.currentUploadType === 'image') {
+      if (this.currentUploadType === 'bg_image') {
+        this.backgroundImageUrl = url;
+      } else if (this.currentUploadType === 'header_media') {
+        this.headerMediaUrl = url;
+      } else if (this.currentUploadType === 'image') {
         this.content += `<p><img src="${url}" style="border-radius: 8px; max-width: 100%;"></p>`;
       } else {
         // Quill CustomVideoBlot ile eşleşebilmesi için video tag'ını veriyoruz.
@@ -660,7 +710,10 @@ export class AnnouncementFormComponent implements OnInit, OnDestroy {
       titleFontSize: this.titleFontSize,
       titleIsBold: this.titleIsBold,
       titleColor: this.titleColor,
-      repeatInterval: this.repeatInterval
+      repeatInterval: this.repeatInterval,
+      headerMediaUrl: this.headerMediaUrl,
+      backgroundColor: this.backgroundColor,
+      backgroundImageUrl: this.backgroundImageUrl
     };
 
     if (this.editId) {

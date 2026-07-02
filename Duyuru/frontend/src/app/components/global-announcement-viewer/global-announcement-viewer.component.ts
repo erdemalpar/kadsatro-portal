@@ -17,8 +17,19 @@ import { DomSanitizer } from '@angular/platform-browser';
          [ngClass]="currentAnnouncement()?.format === 'Cinematic' ? 'p-0' : 'p-4'">
       
       <!-- Modal Konteyneri (Stile Göre Genişlik/Yükseklik Değişir) -->
-      <div class="relative overflow-hidden shadow-2xl flex flex-col"
-           [ngClass]="getOuterContainerClass()">
+      <div class="relative overflow-visible shadow-2xl flex flex-col"
+           [ngClass]="getOuterContainerClass()"
+           [ngStyle]="bgStyle()">
+        
+        <!-- iPhone Notch / Dynamic Island -->
+        <div *ngIf="currentAnnouncement()?.format === 'Story'" class="absolute top-0 inset-x-0 flex justify-center z-50 pt-3">
+          <div class="w-32 h-7 bg-black rounded-full shadow-[inset_0_0_4px_rgba(255,255,255,0.2)]"></div>
+        </div>
+        <!-- iPhone Donanım Tuşları -->
+        <div *ngIf="currentAnnouncement()?.format === 'Story'" class="absolute -left-[4px] top-24 w-[4px] h-8 bg-gray-700 rounded-l-md"></div>
+        <div *ngIf="currentAnnouncement()?.format === 'Story'" class="absolute -left-[4px] top-36 w-[4px] h-12 bg-gray-700 rounded-l-md"></div>
+        <div *ngIf="currentAnnouncement()?.format === 'Story'" class="absolute -left-[4px] top-52 w-[4px] h-12 bg-gray-700 rounded-l-md"></div>
+        <div *ngIf="currentAnnouncement()?.format === 'Story'" class="absolute -right-[4px] top-40 w-[4px] h-16 bg-gray-700 rounded-r-md"></div>
         
         <!-- Cinematic Modu İçin Yüzer (Floating) Kapat Butonu -->
         <button *ngIf="currentAnnouncement()?.format === 'Cinematic'" (click)="markAsReadAndNext()" 
@@ -29,10 +40,10 @@ import { DomSanitizer } from '@angular/platform-browser';
         </button>
 
         <!-- Header Kısmı (Cinematic Hariç) -->
-        <div *ngIf="currentAnnouncement()?.format !== 'Cinematic'" class="px-6 py-4 flex justify-between items-center shrink-0"
+        <div *ngIf="currentAnnouncement()?.format !== 'Cinematic'" class="px-6 py-4 flex justify-between items-center shrink-0 z-40 relative"
              [ngClass]="{
                'border-b border-gray-200/50': currentAnnouncement()?.format === 'Glassmorphism' || !currentAnnouncement()?.format,
-               'border-none pt-6': currentAnnouncement()?.format === 'Story'
+               'border-none pt-10': currentAnnouncement()?.format === 'Story'
              }">
           <h3 class="font-bold flex items-center gap-2"
               [ngClass]="{
@@ -60,7 +71,7 @@ import { DomSanitizer } from '@angular/platform-browser';
         </div>
         
         <!-- İçerik Alanı -->
-        <div #icerikAlani class="flex-1 min-h-0 overflow-y-scroll overflow-x-hidden p-6 lg:p-10 custom-scrollbar flex flex-col"
+        <div #icerikAlani class="flex-1 min-h-0 overflow-y-scroll overflow-x-hidden p-6 lg:p-10 custom-scrollbar flex flex-col relative z-30"
              [ngClass]="{
                'text-center items-center': currentAnnouncement()?.format === 'Cinematic'
              }">
@@ -72,6 +83,16 @@ import { DomSanitizer } from '@angular/platform-browser';
                     [ngClass]="getLabelClass()">
                 {{ currentAnnouncement()?.format }}
               </span>
+
+              <!-- Üst Medya (Kapak) -->
+              <div *ngIf="currentAnnouncement()?.headerMediaUrl || currentAnnouncement()?.HeaderMediaUrl" class="w-full mb-6 rounded-2xl overflow-hidden shadow-md">
+                <video *ngIf="isVideo(currentAnnouncement()?.headerMediaUrl || currentAnnouncement()?.HeaderMediaUrl)" 
+                       [src]="safeHeaderMediaUrl()" 
+                       autoplay muted loop playsinline class="w-full h-auto object-cover max-h-64"></video>
+                <img *ngIf="!isVideo(currentAnnouncement()?.headerMediaUrl || currentAnnouncement()?.HeaderMediaUrl)" 
+                     [src]="safeHeaderMediaUrl()" 
+                     class="w-full h-auto object-cover max-h-64">
+              </div>
 
               <!-- Başlık -->
               <h1 class="font-extrabold mb-8"
@@ -97,7 +118,7 @@ import { DomSanitizer } from '@angular/platform-browser';
         </div>
         
         <!-- Footer / Butonlar (Cinematic Hariç) -->
-        <div *ngIf="currentAnnouncement()?.format !== 'Cinematic'" class="px-6 py-4 flex justify-between items-center shrink-0"
+        <div *ngIf="currentAnnouncement()?.format !== 'Cinematic'" class="px-6 py-4 flex justify-between items-center shrink-0 z-40 relative"
              [ngClass]="{
                'border-t border-gray-200/50': currentAnnouncement()?.format === 'Glassmorphism' || !currentAnnouncement()?.format,
                'pb-8': currentAnnouncement()?.format === 'Story'
@@ -245,6 +266,28 @@ export class GlobalAnnouncementViewerComponent implements OnInit, OnDestroy {
     // Editörden gelen bölünmeyen boşlukları normal boşluğa çevir
     content = content.replace(/&nbsp;/g, ' ');
     return this.sanitizer.bypassSecurityTrustHtml(content);
+  });
+
+  safeHeaderMediaUrl = computed(() => {
+    const ann = this.currentAnnouncement();
+    const url = ann?.headerMediaUrl || ann?.HeaderMediaUrl;
+    if (!url) return null;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  });
+
+  bgStyle = computed(() => {
+    const ann = this.currentAnnouncement();
+    if (!ann) return {};
+    let style: any = {};
+    if (ann.backgroundColor || ann.BackgroundColor) {
+      style['background-color'] = ann.backgroundColor || ann.BackgroundColor;
+    }
+    if (ann.backgroundImageUrl || ann.BackgroundImageUrl) {
+      style['background-image'] = `url(${ann.backgroundImageUrl || ann.BackgroundImageUrl})`;
+      style['background-size'] = 'cover';
+      style['background-position'] = 'center';
+    }
+    return style;
   });
   pollingInterval: any;
 
@@ -404,7 +447,10 @@ export class GlobalAnnouncementViewerComponent implements OnInit, OnDestroy {
       return 'animate-[fadeIn_0.5s_ease-in-out] bg-gradient-to-b from-gray-900 to-black rounded-none w-full h-full max-w-full max-h-full';
     }
     if (format === 'Story') {
-      return 'animate-[fadeIn_0.3s_ease-out] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 rounded-[2.5rem] w-full max-w-md h-[85vh] border-4 border-gray-900';
+      const ann = this.currentAnnouncement();
+      const hasBg = !!(ann?.backgroundColor || ann?.BackgroundColor || ann?.backgroundImageUrl || ann?.BackgroundImageUrl);
+      const bgClass = hasBg ? 'bg-transparent' : 'bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500';
+      return `animate-[fadeIn_0.3s_ease-out] ${bgClass} rounded-[3rem] w-full max-w-md h-[85vh] border-[6px] border-black overflow-hidden ring-4 ring-gray-800`;
     }
 
     // Glassmorphism or default
@@ -463,4 +509,9 @@ export class GlobalAnnouncementViewerComponent implements OnInit, OnDestroy {
     return 'prose-indigo prose-img:rounded-xl prose-img:shadow-md';
   }
 
+  isVideo(url: string | null | undefined): boolean {
+    if (!url) return false;
+    const cleanUrl = url.split('?')[0].toLowerCase();
+    return cleanUrl.endsWith('.mp4') || cleanUrl.endsWith('.webm') || cleanUrl.endsWith('.ogg') || cleanUrl.endsWith('.mov');
+  }
 }

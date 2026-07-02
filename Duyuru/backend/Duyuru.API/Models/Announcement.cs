@@ -32,6 +32,11 @@ namespace Duyuru.API.Models
         // Yayına girme tekrarlama sıklığı (Örn: None, Yearly, Monthly)
         public string RepeatInterval { get; set; } = "None";
 
+        // Görsel Geliştirmeler (Medya ve Arka Plan)
+        public string? HeaderMediaUrl { get; set; }
+        public string? BackgroundColor { get; set; }
+        public string? BackgroundImageUrl { get; set; }
+
 
         public string? RejectionReason { get; set; }
         

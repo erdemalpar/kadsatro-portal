@@ -33,8 +33,9 @@ window.initNetworkAnimation = function() {
     let currentCountryIndex = 0; 
     let animationFrameId;
 
-    function updateCanvasTheme() {
-        const isLight = document.documentElement.classList.contains('light-mode');
+    window.updateCanvasTheme = function() {
+        // Login projesi dark-theme kullanırken, Portal light-mode kullanıyor. İki duruma da destek veriyoruz.
+        const isLight = document.documentElement.classList.contains('light-mode') || !document.documentElement.classList.contains('dark-theme');
         currentParticleColor = isLight ? '#0ea5e9' : '#66fcf1';
         currentLineColorRGB = isLight ? '14, 165, 233' : '102, 252, 241';
         particles.forEach(p => p.color = currentParticleColor);
@@ -170,7 +171,7 @@ window.initNetworkAnimation = function() {
             document.documentElement.classList.toggle('light-mode');
             document.getElementById('sunIcon')?.classList.toggle('hidden');
             document.getElementById('moonIcon')?.classList.toggle('hidden');
-            updateCanvasTheme();
+            if (typeof window.updateCanvasTheme === 'function') window.updateCanvasTheme();
         });
     }
     

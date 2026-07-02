@@ -18,7 +18,18 @@ const POLLING_MS = 30_000;
          class="fixed inset-0 z-[9999] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm">
 
       <div [ngClass]="containerClass()"
-           class="relative overflow-hidden shadow-2xl flex flex-col">
+           [ngStyle]="bgStyle()"
+           class="relative overflow-visible shadow-2xl flex flex-col">
+
+        <!-- iPhone Notch / Dynamic Island -->
+        <div *ngIf="current()?.format === 'Story'" class="absolute top-0 inset-x-0 flex justify-center z-50 pt-3">
+          <div class="w-32 h-7 bg-black rounded-full shadow-[inset_0_0_4px_rgba(255,255,255,0.2)]"></div>
+        </div>
+        <!-- iPhone Donanım Tuşları -->
+        <div *ngIf="current()?.format === 'Story'" class="absolute -left-[4px] top-24 w-[4px] h-8 bg-gray-700 rounded-l-md"></div>
+        <div *ngIf="current()?.format === 'Story'" class="absolute -left-[4px] top-36 w-[4px] h-12 bg-gray-700 rounded-l-md"></div>
+        <div *ngIf="current()?.format === 'Story'" class="absolute -left-[4px] top-52 w-[4px] h-12 bg-gray-700 rounded-l-md"></div>
+        <div *ngIf="current()?.format === 'Story'" class="absolute -right-[4px] top-40 w-[4px] h-16 bg-gray-700 rounded-r-md"></div>
 
         <!-- Cinematic kapatma -->
         <button *ngIf="current()?.format === 'Cinematic'" (click)="kapat()"
@@ -31,7 +42,7 @@ const POLLING_MS = 30_000;
         <!-- Header -->
         <div *ngIf="current()?.format !== 'Cinematic'"
              [ngClass]="headerClass()"
-             class="px-6 py-4 flex justify-between items-center shrink-0">
+             class="px-6 py-4 flex justify-between items-center shrink-0 z-40 relative">
           <h3 [ngClass]="baslikRenk()" class="font-bold flex items-center gap-2">
             <svg *ngIf="current()?.format !== 'Story'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" viewBox="0 0 20 20" fill="currentColor">
               <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
@@ -50,13 +61,24 @@ const POLLING_MS = 30_000;
 
         <!-- İçerik -->
         <div [ngClass]="icerikDivClass()"
-             class="flex-1 min-h-0 overflow-y-scroll overflow-x-hidden p-6 lg:p-10 flex flex-col custom-scrollbar">
+             class="flex-1 min-h-0 overflow-y-scroll overflow-x-hidden p-6 lg:p-10 flex flex-col custom-scrollbar relative z-30">
           <div [ngClass]="icerikIcClass()" class="shrink-0">
             <span *ngIf="current()?.format !== 'Story'"
                   [ngClass]="etiketClass()"
                   class="inline-block px-3 py-1 text-xs font-bold rounded-full mb-6">
               {{ current()?.format }}
             </span>
+
+            <!-- Üst Medya (Kapak) -->
+            <div *ngIf="current()?.headerMediaUrl || current()?.HeaderMediaUrl" class="w-full mb-6 rounded-2xl overflow-hidden shadow-md">
+              <video *ngIf="isVideo(current()?.headerMediaUrl || current()?.HeaderMediaUrl)" 
+                     [src]="safeHeaderMediaUrl()" 
+                     autoplay muted loop playsinline class="w-full h-auto object-cover max-h-64"></video>
+              <img *ngIf="!isVideo(current()?.headerMediaUrl || current()?.HeaderMediaUrl)" 
+                   [src]="safeHeaderMediaUrl()" 
+                   class="w-full h-auto object-cover max-h-64">
+            </div>
+
             <h1 [ngClass]="h1Class()" [ngStyle]="getTitleStyles()" class="font-extrabold mb-8">{{ current()?.title }}</h1>
             <div [ngClass]="proseClass()"
                  class="prose max-w-none w-full overflow-x-hidden"
@@ -76,7 +98,7 @@ const POLLING_MS = 30_000;
         <!-- Footer -->
         <div *ngIf="current()?.format !== 'Cinematic'"
              [ngClass]="footerClass()"
-             class="px-6 py-4 flex justify-between items-center shrink-0">
+             class="px-6 py-4 flex justify-between items-center shrink-0 z-40 relative">
           <span *ngIf="kuyruk().length > 1" class="text-xs font-bold text-gray-400">
             {{ kuyruk().length - 1 }} duyuru daha var...
           </span>
@@ -201,6 +223,26 @@ const POLLING_MS = 30_000;
     :host ::ng-deep .custom-scrollbar::-webkit-scrollbar-thumb:hover {
       background: rgba(107, 114, 128, 0.9);
     }
+
+    /* RGB LED Animasyonları */
+    @keyframes rgbPulseGlow {
+      0%   { border-color: #ff0000; box-shadow: 0 0 10px #ff0000, inset 0 0 10px #ff0000; }
+      16%  { border-color: #ff00ff; box-shadow: 0 0 25px #ff00ff, inset 0 0 25px #ff00ff; }
+      33%  { border-color: #0000ff; box-shadow: 0 0 10px #0000ff, inset 0 0 10px #0000ff; }
+      50%  { border-color: #00ffff; box-shadow: 0 0 25px #00ffff, inset 0 0 25px #00ffff; }
+      66%  { border-color: #00ff00; box-shadow: 0 0 10px #00ff00, inset 0 0 10px #00ff00; }
+      83%  { border-color: #ffff00; box-shadow: 0 0 25px #ffff00, inset 0 0 25px #ffff00; }
+      100% { border-color: #ff0000; box-shadow: 0 0 10px #ff0000, inset 0 0 10px #ff0000; }
+    }
+    @keyframes modalPopGlow {
+      0% { opacity: 0; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.02); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    :host ::ng-deep .rgb-led-border {
+      border: 3px solid #ff0000 !important;
+      animation: rgbPulseGlow 4s ease-in-out infinite, modalPopGlow 0.5s ease-out forwards;
+    }
   `]
 })
 export class AnnouncementPopupComponent implements OnInit, OnDestroy {
@@ -208,11 +250,33 @@ export class AnnouncementPopupComponent implements OnInit, OnDestroy {
   current = signal<any | null>(null);
   private sanitizer = inject(DomSanitizer);
   safeContent = computed(() => {
-    let content = this.current()?.content || '';
-    // Kopyala-yapıştır veya editör kaynaklı bölünmeyen boşlukları (&nbsp;) normal boşluğa çevir.
-    // Bu sayede metin tek bir devasa kelime gibi davranmaz ve satır sonlarında harflerden rastgele kırılmaz.
-    content = content.replace(/&nbsp;/g, ' ');
-    return this.sanitizer.bypassSecurityTrustHtml(content);
+    const ann = this.current();
+    if (!ann || !ann.content) return '';
+    // Editörden gelen &nbsp; vb. boşlukları dönüştür
+    const fixedContent = ann.content.replace(/&nbsp;/g, ' ');
+    return this.sanitizer.bypassSecurityTrustHtml(fixedContent);
+  });
+
+  safeHeaderMediaUrl = computed(() => {
+    const ann = this.current();
+    const url = ann?.headerMediaUrl || ann?.HeaderMediaUrl;
+    if (!url) return null;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  });
+
+  bgStyle = computed(() => {
+    const ann = this.current();
+    if (!ann) return {};
+    let style: any = {};
+    if (ann.backgroundColor || ann.BackgroundColor) {
+      style['background-color'] = ann.backgroundColor || ann.BackgroundColor;
+    }
+    if (ann.backgroundImageUrl || ann.BackgroundImageUrl) {
+      style['background-image'] = `url(${ann.backgroundImageUrl || ann.BackgroundImageUrl})`;
+      style['background-size'] = 'cover';
+      style['background-position'] = 'center';
+    }
+    return style;
   });
 
   private pollingId: any = null;
@@ -317,18 +381,22 @@ export class AnnouncementPopupComponent implements OnInit, OnDestroy {
 
     if (this.fmt === 'Cinematic')
       return 'animate-[fadeIn_0.5s_ease-in-out] bg-gradient-to-b from-gray-900 to-black rounded-none w-full h-full max-w-full max-h-full';
-    if (this.fmt === 'Story')
-      return 'animate-[fadeIn_0.3s_ease-out] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 rounded-[2.5rem] w-full max-w-md h-[85vh] border-4 border-gray-900';
+    if (this.fmt === 'Story') {
+      const ann = this.current();
+      const hasBg = !!(ann?.backgroundColor || ann?.BackgroundColor || ann?.backgroundImageUrl || ann?.BackgroundImageUrl);
+      const bgClass = hasBg ? 'bg-transparent' : 'bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500';
+      return `animate-[fadeIn_0.3s_ease-out] ${bgClass} rounded-[3rem] w-full max-w-md h-[85vh] border-[6px] border-black overflow-hidden ring-4 ring-gray-800 rgb-led-border`;
+    }
 
     // Glassmorphism or default
-    let base = 'animate-[fadeIn_0.3s_ease-out] bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl w-full max-h-[90vh] ';
+    let base = 'bg-white/70 backdrop-blur-xl rounded-3xl w-full max-h-[90vh] rgb-led-border ';
     if (layout === 'Geniş') return base + 'max-w-6xl';
     if (layout === 'Tam Ekran') return base + 'max-w-[95vw]';
     return base + 'max-w-4xl';
   }
 
   headerClass(): string {
-    return this.fmt === 'Story' ? 'border-none pt-6' : 'border-b border-gray-200/50';
+    return this.fmt === 'Story' ? 'border-none pt-10' : 'border-b border-gray-200/50';
   }
 
   baslikRenk(): string {
@@ -400,5 +468,11 @@ export class AnnouncementPopupComponent implements OnInit, OnDestroy {
     return this.fmt === 'Story'
       ? 'bg-white/20 text-white hover:bg-white/30 backdrop-blur-md w-full'
       : 'bg-indigo-600 text-white hover:bg-indigo-700';
+  }
+
+  isVideo(url: string | null | undefined): boolean {
+    if (!url) return false;
+    const cleanUrl = url.split('?')[0].toLowerCase();
+    return cleanUrl.endsWith('.mp4') || cleanUrl.endsWith('.webm') || cleanUrl.endsWith('.ogg') || cleanUrl.endsWith('.mov');
   }
 }

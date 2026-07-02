@@ -137,6 +137,11 @@ export class AppComponent implements OnInit, AfterViewInit {
       document.documentElement.classList.remove('dark');
       document.body.classList.remove('dark');
     }
+    
+    // Animasyon renklerini güncelle
+    if (typeof (window as any)['updateCanvasTheme'] === 'function') {
+      (window as any)['updateCanvasTheme']();
+    }
   }
 
   onAuthLogin(user: string, pass: string) {

@@ -24,6 +24,9 @@ export interface AnnouncementResponseDto {
     titleIsBold?: boolean;
     titleColor?: string;
     repeatInterval?: string;
+    headerMediaUrl?: string | null;
+    backgroundColor?: string | null;
+    backgroundImageUrl?: string | null;
 }
 
 export interface CreateAnnouncementDto {
@@ -42,6 +45,9 @@ export interface CreateAnnouncementDto {
     titleIsBold?: boolean;
     titleColor?: string;
     repeatInterval?: string;
+    headerMediaUrl?: string | null;
+    backgroundColor?: string | null;
+    backgroundImageUrl?: string | null;
 }
 
 export interface UpdateAnnouncementStatusDto {
@@ -64,6 +70,9 @@ export interface UpdateAnnouncementDto {
   titleIsBold?: boolean;
   titleColor?: string;
   repeatInterval?: string;
+  headerMediaUrl?: string | null;
+  backgroundColor?: string | null;
+  backgroundImageUrl?: string | null;
 }
 
 export interface DashboardStatsDto {
