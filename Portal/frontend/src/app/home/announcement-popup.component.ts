@@ -5,7 +5,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 
 const DUYURU_API = 'http://localhost:5005/api/announcement';
 const DUYURU_HUB = 'http://localhost:5005/announcementHub';
-const POLLING_MS  = 30_000;
+const POLLING_MS = 30_000;
 
 @Component({
   selector: 'app-announcement-popup',
@@ -59,7 +59,8 @@ const POLLING_MS  = 30_000;
             </span>
             <h1 [ngClass]="h1Class()" [ngStyle]="getTitleStyles()" class="font-extrabold mb-8">{{ current()?.title }}</h1>
             <div [ngClass]="proseClass()"
-                 class="prose max-w-none w-full break-words overflow-x-auto"
+                 class="prose max-w-none w-full overflow-x-hidden"
+                 style="text-align: justify; word-break: normal; overflow-wrap: break-word; hyphens: none;"
                  [innerHTML]="safeContent()"></div>
 
             <!-- Cinematic alt -->
@@ -154,11 +155,23 @@ const POLLING_MS  = 30_000;
       content: "\\00a0"; /* Non-breaking space ile satır yüksekliğini sağla */
       display: inline-block;
     }
+    :host ::ng-deep .prose,
+    :host ::ng-deep .prose * {
+      word-break: normal !important;
+      overflow-wrap: normal !important;
+      word-wrap: normal !important;
+      hyphens: none !important;
+    }
     :host ::ng-deep .prose p {
-      min-height: 1.5em; 
+      min-height: 1.5em;
       margin-top: 0 !important;
       margin-bottom: 0.75em !important;
+      text-align: justify;        /* Varsayılan: iki yana yaslı */
     }
+    /* Quill tarafından seçilen hizalamalar üst kuralları ezer */
+    :host ::ng-deep .prose .ql-align-center { text-align: center !important; }
+    :host ::ng-deep .prose .ql-align-right  { text-align: right  !important; }
+    :host ::ng-deep .prose .ql-align-justify { text-align: justify !important; }
 
     :host ::ng-deep .prose img,
     :host ::ng-deep .prose video {
@@ -191,18 +204,24 @@ const POLLING_MS  = 30_000;
   `]
 })
 export class AnnouncementPopupComponent implements OnInit, OnDestroy {
-  kuyruk       = signal<any[]>([]);
-  current      = signal<any | null>(null);
+  kuyruk = signal<any[]>([]);
+  current = signal<any | null>(null);
   private sanitizer = inject(DomSanitizer);
-  safeContent = computed(() => this.sanitizer.bypassSecurityTrustHtml(this.current()?.content || ''));
+  safeContent = computed(() => {
+    let content = this.current()?.content || '';
+    // Kopyala-yapıştır veya editör kaynaklı bölünmeyen boşlukları (&nbsp;) normal boşluğa çevir.
+    // Bu sayede metin tek bir devasa kelime gibi davranmaz ve satır sonlarında harflerden rastgele kırılmaz.
+    content = content.replace(/&nbsp;/g, ' ');
+    return this.sanitizer.bypassSecurityTrustHtml(content);
+  });
 
-  private pollingId:   any = null;
+  private pollingId: any = null;
   private hub: signalR.HubConnection | null = null;
 
   private get userId(): number {
     const role = localStorage.getItem('dys_role') || '';
-    if (role === 'Admin')     return 1;
-    if (role === 'Editor')    return 2;
+    if (role === 'Admin') return 1;
+    if (role === 'Editor') return 2;
     if (role === 'Moderator') return 3;
     return 4;
   }
@@ -234,7 +253,7 @@ export class AnnouncementPopupComponent implements OnInit, OnDestroy {
       const liste: any[] = await res.json();
 
       const dismissed = this.dismissedList();
-      const aktifId   = this.current()?.id;
+      const aktifId = this.current()?.id;
       const kuyrukIds = this.kuyruk().map((x: any) => x.id);
 
       const yeniElemanlar = liste.filter((d: any) => {
@@ -291,7 +310,7 @@ export class AnnouncementPopupComponent implements OnInit, OnDestroy {
   // ── CSS helpers (Angular [class.x] yerine string döner) ──────────────────
   private get fmt() { return this.current()?.format; }
 
-  overlayClass()    { return this.fmt === 'Cinematic' ? 'p-0' : 'p-4'; }
+  overlayClass() { return this.fmt === 'Cinematic' ? 'p-0' : 'p-4'; }
 
   containerClass(): string {
     const layout = this.current()?.layoutWidth || this.current()?.LayoutWidth || 'Standart';
@@ -300,7 +319,7 @@ export class AnnouncementPopupComponent implements OnInit, OnDestroy {
       return 'animate-[fadeIn_0.5s_ease-in-out] bg-gradient-to-b from-gray-900 to-black rounded-none w-full h-full max-w-full max-h-full';
     if (this.fmt === 'Story')
       return 'animate-[fadeIn_0.3s_ease-out] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 rounded-[2.5rem] w-full max-w-md h-[85vh] border-4 border-gray-900';
-    
+
     // Glassmorphism or default
     let base = 'animate-[fadeIn_0.3s_ease-out] bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl w-full max-h-[90vh] ';
     if (layout === 'Geniş') return base + 'max-w-6xl';
@@ -336,10 +355,10 @@ export class AnnouncementPopupComponent implements OnInit, OnDestroy {
     if (this.fmt === 'Story') return baseClass + 'flex-1 flex flex-col';
 
     if (this.fmt === 'Cinematic') {
-       baseClass += 'flex flex-col items-center shrink-0 ';
-       if (layout === 'Geniş') return baseClass + 'max-w-6xl px-8';
-       if (layout === 'Tam Ekran') return baseClass + 'max-w-[95vw] px-12';
-       return baseClass + 'max-w-4xl';
+      baseClass += 'flex flex-col items-center shrink-0 my-auto py-10 ';
+      if (layout === 'Geniş') return baseClass + 'max-w-6xl px-8';
+      if (layout === 'Tam Ekran') return baseClass + 'max-w-[95vw] px-12';
+      return baseClass + 'max-w-4xl';
     }
 
     return baseClass;
@@ -352,7 +371,7 @@ export class AnnouncementPopupComponent implements OnInit, OnDestroy {
 
   h1Class(): string {
     if (this.fmt === 'Cinematic') return 'drop-shadow-2xl';
-    if (this.fmt === 'Story')     return 'drop-shadow-lg leading-tight mt-auto';
+    if (this.fmt === 'Story') return 'drop-shadow-lg leading-tight mt-auto';
     return '';
   }
 
@@ -369,7 +388,7 @@ export class AnnouncementPopupComponent implements OnInit, OnDestroy {
 
   proseClass(): string {
     if (this.fmt === 'Cinematic') return 'prose-invert prose-xl text-left';
-    if (this.fmt === 'Story')     return 'prose-invert';
+    if (this.fmt === 'Story') return 'prose-invert';
     return 'prose-indigo prose-img:rounded-xl prose-img:shadow-md';
   }
 

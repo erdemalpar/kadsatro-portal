@@ -119,7 +119,7 @@ export class LayoutComponent {
   currentRole = this.authService.currentRole;
   isMobileMenuOpen = signal(false);
 
-  sidebarWidth = signal(Math.round(window.innerWidth * 0.25)); // Ekranın %45'i
+  sidebarWidth = signal(Math.round(window.innerWidth * 0.28)); // Ekranın %45'i
   private isResizing = false;
 
   @HostListener('document:mousemove', ['$event'])

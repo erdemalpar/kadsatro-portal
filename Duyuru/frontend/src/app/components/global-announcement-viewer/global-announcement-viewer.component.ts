@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AnnouncementService } from '../../services/announcement.service';
 import { Subscription } from 'rxjs';
@@ -60,9 +60,9 @@ import { DomSanitizer } from '@angular/platform-browser';
         </div>
         
         <!-- İçerik Alanı -->
-        <div class="flex-1 min-h-0 overflow-y-scroll overflow-x-hidden p-6 lg:p-10 custom-scrollbar flex flex-col"
+        <div #icerikAlani class="flex-1 min-h-0 overflow-y-scroll overflow-x-hidden p-6 lg:p-10 custom-scrollbar flex flex-col"
              [ngClass]="{
-               'py-24 text-center items-center': currentAnnouncement()?.format === 'Cinematic'
+               'text-center items-center': currentAnnouncement()?.format === 'Cinematic'
              }">
            
            <div [ngClass]="getContainerClass()"
@@ -81,8 +81,9 @@ import { DomSanitizer } from '@angular/platform-browser';
               </h1>
               
               <!-- HTML İçerik (Prose) -->
-              <div class="prose max-w-none w-full break-words overflow-x-auto" 
+              <div class="prose max-w-none w-full overflow-x-hidden" 
                    [ngClass]="getProseClass()"
+                   style="text-align: justify; word-break: normal; overflow-wrap: break-word; hyphens: none;"
                    [innerHTML]="safeContent()"></div>
                    
               <!-- Cinematic Kapat Butonu -->
@@ -181,11 +182,23 @@ import { DomSanitizer } from '@angular/platform-browser';
       content: "\\00a0"; /* Non-breaking space ile satır yüksekliğini sağla */
       display: inline-block;
     }
+    :host ::ng-deep .prose,
+    :host ::ng-deep .prose * {
+      word-break: normal !important;
+      overflow-wrap: normal !important;
+      word-wrap: normal !important;
+      hyphens: none !important;
+    }
     :host ::ng-deep .prose p {
-      min-height: 1.5em; 
+      min-height: 1.5em;
       margin-top: 0 !important;
       margin-bottom: 0.75em !important;
+      text-align: justify;        /* Varsayılan: iki yana yaslı */
     }
+    /* Quill tarafından seçilen hizalamalar üst kuralları ezer */
+    :host ::ng-deep .prose .ql-align-center  { text-align: center  !important; }
+    :host ::ng-deep .prose .ql-align-right   { text-align: right   !important; }
+    :host ::ng-deep .prose .ql-align-justify { text-align: justify !important; }
 
     :host ::ng-deep .prose img,
     :host ::ng-deep .prose video {
@@ -223,11 +236,18 @@ export class GlobalAnnouncementViewerComponent implements OnInit, OnDestroy {
   private sanitizer = inject(DomSanitizer);
   private sub = new Subscription();
 
+  @ViewChild('icerikAlani') icerikAlani?: ElementRef<HTMLDivElement>;
+
   queue = signal<any[]>([]);
   currentAnnouncement = signal<any | null>(null);
-  safeContent = computed(() => this.sanitizer.bypassSecurityTrustHtml(this.currentAnnouncement()?.content || ''));
+  safeContent = computed(() => {
+    let content = this.currentAnnouncement()?.content || '';
+    // Editörden gelen bölünmeyen boşlukları normal boşluğa çevir
+    content = content.replace(/&nbsp;/g, ' ');
+    return this.sanitizer.bypassSecurityTrustHtml(content);
+  });
   pollingInterval: any;
-  
+
   isPreviewMode = false;
 
   ngOnInit() {
@@ -241,15 +261,16 @@ export class GlobalAnnouncementViewerComponent implements OnInit, OnDestroy {
       this.announcementService.previewAnnouncement$.subscribe(data => {
         this.isPreviewMode = true;
         this.currentAnnouncement.set(data);
+        this.scrolluSifirla();
       })
     );
 
     // Sayfa değiştirildiğinde anlık olarak kontrol et
     this.sub.add(
       this.router.events.pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe(() => {
-        this.fetchUnreadAnnouncements();
-      })
+        .subscribe(() => {
+          this.fetchUnreadAnnouncements();
+        })
     );
 
     // SignalR WebSocket üzerinden gelen 'Yeni Duyuru Yayınlandı' tetikleyicisi
@@ -279,15 +300,15 @@ export class GlobalAnnouncementViewerComponent implements OnInit, OnDestroy {
     try {
       const data = await this.announcementService.getUnreadAnnouncements();
       if (data && data.length > 0) {
-        
+
         // Sadece kuyrukta olmayan YENİ duyuruları ekle
         const currentQueue = this.queue();
         const currentActive = this.currentAnnouncement();
-        
+
         // Zaten bu oturumda (session) kapatılmış (okundu denmiş) duyuruları filtrele
         const dismissedStr = sessionStorage.getItem('dismissed_announcements');
         const dismissed = dismissedStr ? JSON.parse(dismissedStr) : [];
-        
+
         const newItems = data.filter((d: any) => {
           // Sıklıklı mod (Once + süre tanımlı) → dismissed kontrolü atla, süre zaten backend'de hesaplanıyor
           const isSiklikli = d.frequency === 'Once' && d.onceDurationMinutes > 0;
@@ -299,14 +320,14 @@ export class GlobalAnnouncementViewerComponent implements OnInit, OnDestroy {
 
         if (newItems.length > 0) {
           this.queue.update(q => [...q, ...newItems]);
-          
+
           // Eğer ekranda aktif popup yoksa hemen göster
           if (!this.currentAnnouncement()) {
             this.processQueue();
           }
         }
       }
-    } catch(err) {
+    } catch (err) {
       console.error('Okunmamış duyurular çekilemedi:', err);
     }
   }
@@ -316,14 +337,25 @@ export class GlobalAnnouncementViewerComponent implements OnInit, OnDestroy {
     if (q.length > 0) {
       this.isPreviewMode = false;
       this.currentAnnouncement.set(q[0]);
+      this.scrolluSifirla();
     } else {
       this.currentAnnouncement.set(null);
     }
   }
 
+  /** Yeni duyuruya geçişte içerik alanının scroll pozisyonunu sıfırlar */
+  private scrolluSifirla() {
+    // DOM güncellemesinin tamamlanmasını bekleyip scroll'u sıfırla
+    setTimeout(() => {
+      if (this.icerikAlani?.nativeElement) {
+        this.icerikAlani.nativeElement.scrollTop = 0;
+      }
+    }, 0);
+  }
+
   async markAsReadAndNext() {
     const current = this.currentAnnouncement();
-    
+
     // Eğer önizleme modundaysa DB'ye yazma, direkt kapat
     if (this.isPreviewMode) {
       this.currentAnnouncement.set(null);
@@ -349,10 +381,10 @@ export class GlobalAnnouncementViewerComponent implements OnInit, OnDestroy {
             sessionStorage.setItem('dismissed_announcements', JSON.stringify(dismissed));
           }
         }
-      } catch(e) {
-         console.error('Okundu işaretlenirken hata:', e);
+      } catch (e) {
+        console.error('Okundu işaretlenirken hata:', e);
       }
-      
+
       // İlk elemanı çıkar (Kuyruğu ilerlet)
       this.queue.update(q => q.slice(1));
       this.processQueue(); // sıradakini göster
@@ -374,7 +406,7 @@ export class GlobalAnnouncementViewerComponent implements OnInit, OnDestroy {
     if (format === 'Story') {
       return 'animate-[fadeIn_0.3s_ease-out] bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 rounded-[2.5rem] w-full max-w-md h-[85vh] border-4 border-gray-900';
     }
-    
+
     // Glassmorphism or default
     let base = 'animate-[fadeIn_0.3s_ease-out] bg-white/70 backdrop-blur-xl border border-white/40 rounded-3xl w-full max-h-[90vh] flex flex-col ';
     if (layout === 'Geniş') return base + 'max-w-6xl';
@@ -390,10 +422,10 @@ export class GlobalAnnouncementViewerComponent implements OnInit, OnDestroy {
     if (format === 'Story') return baseClass + 'flex-1 flex flex-col max-w-md';
 
     if (format === 'Cinematic') {
-       baseClass += 'flex flex-col items-center shrink-0 ';
-       if (layout === 'Geniş') return baseClass + 'max-w-6xl px-8';
-       if (layout === 'Tam Ekran') return baseClass + 'max-w-full px-12';
-       return baseClass + 'max-w-4xl';
+      let base = 'animate-[fadeIn_0.5s_ease-in-out] w-full flex flex-col items-center my-auto py-12 ';
+      if (layout === 'Geniş') return base + 'max-w-6xl px-8';
+      if (layout === 'Tam Ekran') return base + 'max-w-[95vw] px-12';
+      return base + 'max-w-4xl';
     }
 
     // Glassmorphism or default

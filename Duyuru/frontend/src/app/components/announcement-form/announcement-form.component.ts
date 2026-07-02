@@ -189,7 +189,16 @@ Quill.register(Font, true);
           </div>
           <div>
             <label class="block text-xs font-bold text-gray-700 mb-1">Bitiş</label>
-            <input type="datetime-local" [(ngModel)]="endDate" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-color)]">
+            <input type="datetime-local" [(ngModel)]="endDate"
+                   [min]="startDate || ''"
+                   class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 transition-colors"
+                   [ngClass]="tarihHatasiVarMi ? 'border-red-400 focus:ring-red-400 bg-red-50' : 'border-gray-200 focus:ring-[var(--brand-color)]'">
+            <p *ngIf="tarihHatasiVarMi" class="mt-1 text-xs text-red-600 font-semibold flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Bitiş tarihi başlangıçtan önce olamaz
+            </p>
           </div>
         </div>
 
@@ -383,6 +392,12 @@ export class AnnouncementFormComponent implements OnInit, OnDestroy {
   frequency: any = 'Once';
   startDate: string | null = null;
   endDate: string | null = null;
+
+  /** Bitiş tarihi başlangıç tarihinden önce mi? */
+  get tarihHatasiVarMi(): boolean {
+    if (!this.startDate || !this.endDate) return false;
+    return new Date(this.endDate) < new Date(this.startDate);
+  }
   onceDurationMinutes: number | null = null;
   layoutWidth: string = 'Standart';
 
@@ -551,6 +566,10 @@ export class AnnouncementFormComponent implements OnInit, OnDestroy {
 
   async submit() {
     if (!this.title || !this.content) return;
+    if (this.tarihHatasiVarMi) {
+      this.alertService.error('Bitiş tarihi, başlangıç tarihinden önce olamaz!');
+      return;
+    }
 
     let success = false;
     const payload = {
